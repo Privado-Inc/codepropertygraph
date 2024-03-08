@@ -1,5 +1,6 @@
-package io.shiftleft.utils
+package io.shiftleft.passes
 
+import io.shiftleft.passes.GenericConcurrentQueueProcessor
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
@@ -7,7 +8,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import scala.collection.mutable.ListBuffer
 
 class SampleConcurrentProcessor(result: ListBuffer[String])
-    extends ConcurrentProcessor[String, ListBuffer[String]](result) {
+    extends GenericConcurrentQueueProcessor[String, ListBuffer[String]](result) {
   override def generateParts(): Array[String] = Array("first", "second", "third", "forth")
 
   override def runOnPart(part: String): Unit = {
@@ -22,10 +23,10 @@ class SampleConcurrentProcessor(result: ListBuffer[String])
   }
 }
 
-class ConcurrentProcessorTest extends AnyWordSpec with Matchers with BeforeAndAfterAll {
+class GenericConcurrentQueueProcessorTest extends AnyWordSpec with Matchers with BeforeAndAfterAll {
 
   "Concurrent processor sample" in {
-    val results = new SampleConcurrentProcessor(ListBuffer.empty[String]).createAndApply()
+    val results = new SampleConcurrentProcessor(ListBuffer.empty[String]).process()
     results.contains("first-message") shouldBe true
     results.contains("second-message") shouldBe true
     results.contains("third-message") shouldBe true
