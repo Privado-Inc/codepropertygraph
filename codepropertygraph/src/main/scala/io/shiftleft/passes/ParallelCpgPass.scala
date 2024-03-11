@@ -41,7 +41,6 @@ abstract class ConcurrentWriterCpgPass[T <: AnyRef](
   @nowarn outName: String = "",
   keyPool: Option[KeyPool] = None
 ) extends NewStyleCpgPassBase[T] {
-
   @volatile var nDiffT = -1
 
   /** WARNING: runOnPart is executed in parallel to committing of graph modifications. The upshot is that it is unsafe
@@ -56,7 +55,6 @@ abstract class ConcurrentWriterCpgPass[T <: AnyRef](
     inverse: Boolean = false,
     prefix: String = ""
   ): Unit = {
-    import ConcurrentWriterCpgPass.producerQueueCapacity
     baseLogger.info(s"Start of enhancement: $name")
     TimeMetric.initiateNewStage(getClass.getSimpleName, Some(name), getClass.getSuperclass.getSimpleName)
     val nanosStart = System.nanoTime()
@@ -66,45 +64,26 @@ abstract class ConcurrentWriterCpgPass[T <: AnyRef](
     init()
     val parts = generateParts()
     nParts = parts.size
-    val partIter        = parts.iterator
-    val completionQueue = mutable.ArrayDeque[Future[overflowdb.BatchedUpdate.DiffGraph]]()
-    val writer          = new Writer(MDC.getCopyOfContextMap())
-    val writerThread    = new Thread(writer)
+    val writer       = new Writer(MDC.getCopyOfContextMap())
+    val writerThread = new Thread(writer)
     writerThread.setName("Writer")
     writerThread.start()
     implicit val ec: ExecutionContext = ExecutionContextProvider.getExecutionContext
     try {
       try {
-        // The idea is that we have a ringbuffer completionQueue that contains the workunits that are currently in-flight.
-        // We add futures to the end of the ringbuffer, and take futures from the front.
-        // then we await the future from the front, and add it to the writer-queue.
-        // the end result is that we get deterministic output (esp. deterministic order of changes), while having up to one
-        // writer-thread and up to producerQueueCapacity many threads in-flight.
-        // as opposed to ParallelCpgPass, there is no race between diffgraph-generators to enqueue into the writer -- everything
-        // is nice and ordered. Downside is that a very slow part may gum up the works (i.e. the completionQueue fills up and threads go idle)
-        var done = false
-        while (!done && writer.raisedException == null) {
-          if (writer.raisedException != null)
-            throw writer.raisedException // will be wrapped with good stacktrace in the finally block
-
-          if (completionQueue.size < producerQueueCapacity && partIter.hasNext) {
-            val next = partIter.next()
-            // todo: Verify that we get FIFO scheduling; otherwise, do something about it.
-            // if this e.g. used LIFO with 4 cores and 18 size of ringbuffer, then 3 cores may idle while we block on the front item.
-            completionQueue.append(Future.apply {
+        val futures = parts
+          .map(part => {
+            Future {
               val builder = new DiffGraphBuilder
-              runOnPart(builder, next.asInstanceOf[T])
-              builder.build()
-            })
-          } else if (completionQueue.nonEmpty) {
-            val future = completionQueue.removeHead()
-            val res    = Await.result(future, Duration.Inf)
-            nDiff += res.size
-            writer.queue.put(Some(res))
-          } else {
-            done = true
-          }
-        }
+              runOnPart(builder, part.asInstanceOf[T])
+              writer.queue.put(Some(builder.build()))
+            }
+          })
+          .toList
+        val allResults: Future[List[Unit]] = Future.sequence(futures)
+        Await.result(allResults, Duration.Inf)
+        if (writer.raisedException != null)
+          throw writer.raisedException // will be wrapped with good stacktrace in the finally block
       } finally {
         try {
           // if the writer died on us, then the queue might be full and we could deadlock
@@ -132,7 +111,7 @@ abstract class ConcurrentWriterCpgPass[T <: AnyRef](
   private class Writer(mdc: java.util.Map[String, String]) extends Runnable {
 
     val queue =
-      new LinkedBlockingQueue[Option[overflowdb.BatchedUpdate.DiffGraph]](ConcurrentWriterCpgPass.writerQueueCapacity)
+      new LinkedBlockingQueue[Option[overflowdb.BatchedUpdate.DiffGraph]]()
 
     @volatile var raisedException: Exception = null
 
@@ -164,5 +143,4 @@ abstract class ConcurrentWriterCpgPass[T <: AnyRef](
       }
     }
   }
-
 }
