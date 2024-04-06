@@ -51,7 +51,35 @@ case class CpuMemoryStats(
   maxStats: Option[(Double, Double)]
 )
 
-object TimeMetric {
+/** initialize method is expected to be invoked at the very start of the code. One can initialise the required flags and
+  * the other configurations to start the stats collections.
+  *
+  * @param useFullName
+  *   \- Flag to indicate whether to use fullName or simple name of the stage for logging
+  * @param consoleLog
+  *   \- Flag to indicate log the `invoked` and `done` status of every stage on console as well along with debug logs.
+  * @param timeMetricRecordConfig
+  *   \- If you set this to None, it will not start the thread to log the `cpu` and `memory` consumption stats for each
+  *   stage after regular interval of time to given file path. Configure the expected config values and it will trigger
+  *   the thread to write the stats after configured period of time. Refer {@link TimeMetricRecordConfig}
+  * @param maxPrintBuffers
+  *   \- Print buffer configuration refer {@link MaxPrintBuffers}
+  * @param supressSubStagesConsoleLog
+  *   \- Flag to suppress the sub stage logs to consoles and only log them to debug logs.
+  */
+class TimeMetric( // Flag which indicates whether to use full name or simple name of the pass while logging.
+  val fullName: Boolean = false,
+  // Flag to indicate the `invoked` and `done` status logs for every stage on console as well.
+  val printToConsole: Boolean = false,
+  // sdfds
+  val timeMetricRecordConfig: Option[TimeMetricRecordConfig] = None,
+  // it holds buffer configuration.
+  val maxBuffers: MaxPrintBuffers = MaxPrintBuffers(),
+  /** This is to supress the sub stages stats being printed on console or not. This flag helps to print the stats only
+    * for the passes being used in application.
+    */
+  var supressSubstages: Boolean = true
+) {
 
   val cal = Calendar.getInstance()
 
@@ -81,8 +109,6 @@ object TimeMetric {
   private var lastSubStageName = STAGE_NOT_SET
   // This will hold the metadata for ongoing stage and sub stage combination.
   private var additionalMetaData = STAGE_NOT_SET
-  // Flag to indicate the `invoked` and `done` status logs for every stage on console as well.
-  private var printToConsole = false
 
   /** Stage `invoked` and `done` status's can be logged to both console logger file. By default it will always log to
     * logger file, printing the logs to console can be controlled using flag {@link TimeMetric#printToConsole}
@@ -98,15 +124,6 @@ object TimeMetric {
     * configurable and can be controlled from where it is getting used.
     */
   private var recorder: Option[TimeRecorder] = None
-  // Flag which indicates whether to use full name or simple name of the pass while logging.
-  private var fullName: Boolean = false
-  // it holds buffer configuration.
-  private var maxBuffers: MaxPrintBuffers = MaxPrintBuffers()
-
-  /** This is to supress the sub stages stats being printed on console or not. This flag helps to print the stats only
-    * for the passes being used in application.
-    */
-  private var supressSubstages: Boolean = true
 
   /** Calculate the buffer when it is being used. This is to avoid calculation again and again. Done lazy initialization
     * as the buffer configuration can be done by calling {@link TimeMetric#initialize()}
@@ -131,40 +148,12 @@ object TimeMetric {
   }
   private val osBean = ManagementFactory.getOperatingSystemMXBean().asInstanceOf[OperatingSystemMXBean]
 
-  /** initialize method is expected to be invoked at the very start of the code. One can initialise the required flags
-    * and the other configurations to start the stats collections.
-    *
-    * @param useFullName
-    *   \- Flag to indicate whether to use fullName or simple name of the stage for logging
-    * @param consoleLog
-    *   \- Flag to indicate log the `invoked` and `done` status of every stage on console as well along with debug logs.
-    * @param timeMetricRecordConfig
-    *   \- If you set this to None, it will not start the thread to log the `cpu` and `memory` consumption stats for
-    *   each stage after regular interval of time to given file path. Configure the expected config values and it will
-    *   trigger the thread to write the stats after configured period of time. Refer {@link TimeMetricRecordConfig}
-    * @param maxPrintBuffers
-    *   \- Print buffer configuration refer {@link MaxPrintBuffers}
-    * @param supressSubStagesConsoleLog
-    *   \- Flag to suppress the sub stage logs to consoles and only log them to debug logs.
-    */
-  def initialize(
-    useFullName: Boolean = false,
-    consoleLog: Boolean = false,
-    timeMetricRecordConfig: Option[TimeMetricRecordConfig] = None,
-    maxPrintBuffers: MaxPrintBuffers = MaxPrintBuffers(),
-    supressSubStagesConsoleLog: Boolean = true
-  ): Unit = {
-    fullName = useFullName
-    maxBuffers = maxPrintBuffers
-    supressSubstages = supressSubStagesConsoleLog
-    printToConsole = consoleLog
-    timeMetricRecordConfig match {
-      case Some(config) =>
-        stagePerformance += (ACROSS_PROCESS_STAGE -> NumberProcessor())
-        recorder = Some(TimeRecorder(config))
-        recorder.get.start()
-      case _ =>
-    }
+  timeMetricRecordConfig match {
+    case Some(config) =>
+      stagePerformance += (ACROSS_PROCESS_STAGE -> NumberProcessor())
+      recorder = Some(TimeRecorder(config))
+      recorder.get.start()
+    case _ =>
   }
 
   /** This will help change the flag once it has been set initially using {@link TimeMetric#initialize()} method.

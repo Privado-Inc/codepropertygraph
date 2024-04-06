@@ -17,8 +17,12 @@ import scala.util.{Failure, Success, Try}
  * Base class of a program which receives a CPG as input for the purpose of modifying it.
  * */
 
-abstract class CpgPass(cpg: Cpg, outName: String = "", keyPool: Option[KeyPool] = None)
-    extends ForkJoinParallelCpgPass[AnyRef](cpg, outName, keyPool) {
+abstract class CpgPass(
+  cpg: Cpg,
+  outName: String = "",
+  keyPool: Option[KeyPool] = None,
+  timeMetric: Option[TimeMetric] = None
+) extends ForkJoinParallelCpgPass[AnyRef](cpg, outName, keyPool, timeMetric) {
 
   def run(builder: overflowdb.BatchedUpdate.DiffGraphBuilder): Unit
 
@@ -30,8 +34,12 @@ abstract class CpgPass(cpg: Cpg, outName: String = "", keyPool: Option[KeyPool] 
   override def isParallel: Boolean = false
 }
 
-@deprecated abstract class SimpleCpgPass(cpg: Cpg, outName: String = "", keyPool: Option[KeyPool] = None)
-    extends CpgPass(cpg, outName, keyPool)
+@deprecated abstract class SimpleCpgPass(
+  cpg: Cpg,
+  outName: String = "",
+  keyPool: Option[KeyPool] = None,
+  timeMetric: Option[TimeMetric] = None
+) extends CpgPass(cpg, outName, keyPool, timeMetric)
 
 /* ForkJoinParallelCpgPass is a possible replacement for CpgPass and ParallelCpgPass.
  *
@@ -58,7 +66,8 @@ abstract class CpgPass(cpg: Cpg, outName: String = "", keyPool: Option[KeyPool] 
 abstract class ForkJoinParallelCpgPass[T <: AnyRef](
   cpg: Cpg,
   @nowarn outName: String = "",
-  keyPool: Option[KeyPool] = None
+  keyPool: Option[KeyPool] = None,
+  timeMetric: Option[TimeMetric] = None
 ) extends NewStyleCpgPassBase[T] {
 
   override def createApplySerializeAndStore(
@@ -67,7 +76,7 @@ abstract class ForkJoinParallelCpgPass[T <: AnyRef](
     prefix: String = ""
   ): Unit = {
     baseLogger.info(s"Start of pass: $name")
-    TimeMetric.initiateNewStage(getClass.getSimpleName, Some(name), getClass.getSuperclass.getSimpleName)
+    timeMetric.foreach(_.initiateNewStage(getClass.getSimpleName, Some(name), getClass.getSuperclass.getSimpleName))
     val nanosStart = System.nanoTime()
     var nParts     = 0
     var nanosBuilt = -1L
@@ -101,7 +110,7 @@ abstract class ForkJoinParallelCpgPass[T <: AnyRef](
         baseLogger.info(
           f"Pass $name completed in ${(nanosStop - nanosStart) * 1e-6}%.0f ms (${fracRun}%.0f%% on mutations). ${nDiff}%d + ${nDiffT - nDiff}%d changes committed from ${nParts}%d parts.${serializationString}%s"
         )
-        TimeMetric.endLastStage()
+        timeMetric.foreach(_.endLastStage())
       }
     }
   }

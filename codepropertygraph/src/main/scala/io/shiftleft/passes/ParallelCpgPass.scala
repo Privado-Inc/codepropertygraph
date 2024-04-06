@@ -39,7 +39,8 @@ object ConcurrentWriterCpgPass {
 abstract class ConcurrentWriterCpgPass[T <: AnyRef](
   cpg: Cpg,
   @nowarn outName: String = "",
-  keyPool: Option[KeyPool] = None
+  keyPool: Option[KeyPool] = None,
+  timeMetric: Option[TimeMetric] = None
 ) extends NewStyleCpgPassBase[T] {
 
   @volatile var nDiffT = -1
@@ -58,7 +59,7 @@ abstract class ConcurrentWriterCpgPass[T <: AnyRef](
   ): Unit = {
     import ConcurrentWriterCpgPass.producerQueueCapacity
     baseLogger.info(s"Start of enhancement: $name")
-    TimeMetric.initiateNewStage(getClass.getSimpleName, Some(name), getClass.getSuperclass.getSimpleName)
+    timeMetric.foreach(_.initiateNewStage(getClass.getSimpleName, Some(name), getClass.getSuperclass.getSimpleName))
     val nanosStart = System.nanoTime()
     var nParts     = 0
     var nDiff      = 0
@@ -125,7 +126,7 @@ abstract class ConcurrentWriterCpgPass[T <: AnyRef](
       baseLogger.info(
         f"Enhancement $name completed in ${(nanosStop - nanosStart) * 1e-6}%.0f ms. ${nDiff}%d  + ${nDiffT - nDiff}%d changes committed from ${nParts}%d parts."
       )
-      TimeMetric.endLastStage()
+      timeMetric.foreach(_.endLastStage())
     }
   }
 
