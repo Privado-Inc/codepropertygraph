@@ -18,7 +18,7 @@ class ParallelCpgPassNewTests extends AnyWordSpec with Matchers {
     def apply(keyPools: Option[Iterator[KeyPool]] = None)(f: (Cpg, CpgPassBase) => Unit): Unit = {
       val cpg  = Cpg.emptyCpg
       val pool = keyPools.flatMap(_.nextOption())
-      class MyPass(cpg: Cpg) extends ConcurrentWriterCpgPass[String](cpg, "MyPass", pool) {
+      class MyPass(cpg: Cpg) extends ConcurrentWriterCpgPass[String](cpg, "MyPass", pool, None) {
         override def generateParts(): Array[String] = Array("foo", "bar")
 
         override def runOnPart(diffGraph: DiffGraphBuilder, part: String): Unit = {
@@ -57,7 +57,7 @@ class ParallelCpgPassNewTests extends AnyWordSpec with Matchers {
 
     "fail for schema violations" in {
       val cpg = Cpg.emptyCpg
-      val pass = new ConcurrentWriterCpgPass[String](cpg, "pass2") {
+      val pass = new ConcurrentWriterCpgPass[String](cpg, "pass2", timeMetric = None) {
         override def generateParts() = Array("a", "b")
         override def runOnPart(diffGraph: DiffGraphBuilder, part: String): Unit =
           part match {
@@ -84,7 +84,7 @@ class ParallelCpgPassNewTests extends AnyWordSpec with Matchers {
 
     "add NewNodes that are referenced in different parts only once" in {
       val cpg = Cpg.emptyCpg
-      val pass = new ConcurrentWriterCpgPass[String](cpg, "pass2") {
+      val pass = new ConcurrentWriterCpgPass[String](cpg, "pass2", timeMetric = None) {
         val call1 = NewCall().name("call1")
         val call2 = NewCall().name("call2")
         val call3 = NewCall().name("call3")

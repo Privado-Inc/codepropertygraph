@@ -17,12 +17,8 @@ import scala.util.{Failure, Success, Try}
  * Base class of a program which receives a CPG as input for the purpose of modifying it.
  * */
 
-abstract class CpgPass(
-  cpg: Cpg,
-  outName: String = "",
-  keyPool: Option[KeyPool] = None,
-  timeMetric: Option[TimeMetric] = None
-) extends ForkJoinParallelCpgPass[AnyRef](cpg, outName, keyPool, timeMetric) {
+abstract class CpgPass(cpg: Cpg, outName: String = "", keyPool: Option[KeyPool] = None, timeMetric: Option[TimeMetric])
+    extends ForkJoinParallelCpgPass[AnyRef](cpg, outName, keyPool, timeMetric) {
 
   def run(builder: overflowdb.BatchedUpdate.DiffGraphBuilder): Unit
 
@@ -38,7 +34,7 @@ abstract class CpgPass(
   cpg: Cpg,
   outName: String = "",
   keyPool: Option[KeyPool] = None,
-  timeMetric: Option[TimeMetric] = None
+  timeMetric: Option[TimeMetric]
 ) extends CpgPass(cpg, outName, keyPool, timeMetric)
 
 /* ForkJoinParallelCpgPass is a possible replacement for CpgPass and ParallelCpgPass.
@@ -67,7 +63,7 @@ abstract class ForkJoinParallelCpgPass[T <: AnyRef](
   cpg: Cpg,
   @nowarn outName: String = "",
   keyPool: Option[KeyPool] = None,
-  timeMetric: Option[TimeMetric] = None
+  timeMetric: Option[TimeMetric]
 ) extends NewStyleCpgPassBase[T] {
 
   override def createApplySerializeAndStore(

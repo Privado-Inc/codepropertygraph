@@ -15,7 +15,7 @@ class CpgPassNewTests extends AnyWordSpec with Matchers {
   private object Fixture {
     def apply(keyPool: Option[KeyPool] = None)(f: (Cpg, CpgPassBase) => Unit): Unit = {
       val cpg = Cpg.emptyCpg
-      class MyPass(cpg: Cpg) extends SimpleCpgPass(cpg, "MyPass", keyPool) {
+      class MyPass(cpg: Cpg) extends SimpleCpgPass(cpg, "MyPass", keyPool, None) {
         override def run(builder: DiffGraphBuilder): Unit = {
           val builder2 = new DiffGraphBuilder
           builder.addNode(NewFile().name("foo"))
@@ -53,7 +53,7 @@ class CpgPassNewTests extends AnyWordSpec with Matchers {
 
     "fail for schema violations" in {
       val cpg = Cpg.emptyCpg
-      val pass = new SimpleCpgPass(cpg, "pass1") {
+      val pass = new SimpleCpgPass(cpg, "pass1", timeMetric = None) {
         override def run(dst: DiffGraphBuilder): Unit = {
           val file1 = NewFile().name("foo")
           val file2 = NewFile().name("bar")

@@ -40,7 +40,7 @@ abstract class ConcurrentWriterCpgPass[T <: AnyRef](
   cpg: Cpg,
   @nowarn outName: String = "",
   keyPool: Option[KeyPool] = None,
-  timeMetric: Option[TimeMetric] = None
+  timeMetric: Option[TimeMetric]
 ) extends NewStyleCpgPassBase[T] {
 
   @volatile var nDiffT = -1
