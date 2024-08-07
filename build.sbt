@@ -1,14 +1,13 @@
 name := "codepropertygraph"
 
 // parsed by project/Versions.scala, updated by updateDependencies.sh
-val overflowdbVersion = "0.1.4"
-val overflowdbCodegenVersion = "2.110"
+val flatgraphVersion = "0.1.3"
 
 inThisBuild(
   List(
     organization       := "io.shiftleft",
     scalaVersion       := "3.4.2",
-    resolvers ++= Seq("Github Package Registry" at "https://maven.pkg.github.com/Privado-Inc/overflowdb", Resolver.mavenLocal, "Sonatype OSS" at "https://oss.sonatype.org/content/repositories/public"),
+    resolvers ++= Seq("Github Package Registry" at "https://maven.pkg.github.com/Privado-Inc/flatgraph", Resolver.mavenLocal, "Sonatype OSS" at "https://oss.sonatype.org/content/repositories/public"),
     packageDoc / publishArtifact := true,
     packageSrc / publishArtifact := true,
     scmInfo := Some(
