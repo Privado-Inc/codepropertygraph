@@ -1,12 +1,12 @@
 name := "codepropertygraph"
 
 // parsed by project/Versions.scala, updated by updateDependencies.sh
-val flatgraphVersion = "0.0.89"
+val flatgraphVersion = "0.1.2"
 
 inThisBuild(
   List(
     organization := "io.shiftleft",
-    scalaVersion := "3.4.2",
+    scalaVersion := "3.5.2",
     resolvers ++= Seq(
       "Github Package Registry" at "https://maven.pkg.github.com/Privado-Inc/flatgraph",
       Resolver.mavenLocal,

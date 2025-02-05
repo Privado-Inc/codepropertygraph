@@ -71,12 +71,7 @@ abstract class ForkJoinParallelCpgPassWithTimeout[T <: AnyRef](
       nanosBuilt = System.nanoTime()
       nDiff = diffGraph.size
 
-      // TODO how about `nDiffT` which seems to count the number of modifications..
-      //      nDiffT = overflowdb.BatchedUpdate
-      //        .applyDiff(cpg.graph, diffGraph, null)
-      //        .transitiveModifications()
-
-      flatgraph.DiffGraphApplier.applyDiff(cpg.graph, diffGraph)
+      nDiffT = flatgraph.DiffGraphApplier.applyDiff(cpg.graph, diffGraph)
     } catch {
       case exc: Exception =>
         baseLogger.error(s"Pass ${name} failed", exc)
