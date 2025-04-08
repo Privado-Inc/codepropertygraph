@@ -9,8 +9,8 @@ import org.slf4j.{Logger, LoggerFactory, MDC}
 import java.util.concurrent.{TimeUnit, TimeoutException}
 import java.util.function.{BiConsumer, Supplier}
 import scala.annotation.nowarn
-import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration.{Duration, DurationLong}
+import scala.concurrent.{Await, Future}
 import scala.util.{Failure, Success, Try}
 
 /* CpgPass
@@ -162,30 +162,16 @@ abstract class ForkJoinParallelCpgPass[T <: AnyRef](cpg: Cpg, @nowarn outName: S
         case 1 =>
           runOnPart(externalBuilder, parts(0).asInstanceOf[T])
         case _ =>
-          val stream =
-            if (!isParallel)
-              java.util.Arrays
-                .stream(parts)
-                .sequential()
-            else
-              java.util.Arrays
-                .stream(parts)
-                .parallel()
-          val diff = stream.collect(
-            new Supplier[DiffGraphBuilder] {
-              override def get(): DiffGraphBuilder =
-                Cpg.newDiffGraphBuilder
-            },
-            new BiConsumer[DiffGraphBuilder, AnyRef] {
-              override def accept(builder: DiffGraphBuilder, part: AnyRef): Unit =
-                runOnPart(builder, part.asInstanceOf[T])
-            },
-            new BiConsumer[DiffGraphBuilder, DiffGraphBuilder] {
-              override def accept(leftBuilder: DiffGraphBuilder, rightBuilder: DiffGraphBuilder): Unit =
-                leftBuilder.absorb(rightBuilder)
+          implicit val ec: scala.concurrent.ExecutionContext = scala.concurrent.ExecutionContext.global
+          val futures: List[Future[DiffGraphBuilder]] = parts.map { part =>
+            val future = Future {
+              val diffGraphBuilder = Cpg.newDiffGraphBuilder
+              runOnPart(diffGraphBuilder, part.asInstanceOf[T])
+              diffGraphBuilder
             }
-          )
-          externalBuilder.absorb(diff)
+            future
+          }.toList
+          Await.result(Future.sequence(futures), Duration.Inf).foreach(externalBuilder.absorb)
       }
       nParts
     } finally {
