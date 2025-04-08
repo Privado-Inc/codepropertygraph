@@ -13,6 +13,10 @@ object StatsLogger extends DataLogger {
   ): Unit = { logger.foreach(log => log.initiateNewStage(stageName, stageFullName, additionalMetaDataToLog)) }
 
   def endLastStage(): Unit = { logger.foreach(log => log.endLastStage()) }
+
+  def justLogMessage(message: String): Unit = {
+    logger.foreach(log => log.justLogMessage(message))
+  }
 }
 
 trait DataLogger {
@@ -25,4 +29,6 @@ trait DataLogger {
   ): Unit
 
   def endLastStage(): Unit
+
+  def justLogMessage(message: String): Unit
 }
