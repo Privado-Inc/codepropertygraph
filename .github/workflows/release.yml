@@ -7,7 +7,7 @@ on:
 
 jobs:
   test-codepropertygraph:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
       with:
@@ -20,8 +20,10 @@ jobs:
     - name: Set up JDK
       uses: actions/setup-java@v4
       with:
-        distribution: 'adopt'
-        java-version: 19
+        distribution: temurin
+        java-version: 21
+        cache: sbt
+    - uses: sbt/setup-sbt@v1
     - name: Check formatting
       run: sbt scalafmtCheck Test/scalafmtCheck
     - run: echo "Previous step failed because code is not formatted. Run 'sbt scalafmt'"
@@ -36,7 +38,7 @@ jobs:
   release:
     concurrency: release
     needs: [test-codepropertygraph]
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
@@ -52,11 +54,13 @@ jobs:
         run: echo $PGP_SECRET | base64 --decode | gpg --batch --import
         env:
             PGP_SECRET: ${{ secrets.PGP_SECRET }}
-      - name: Set up JDK 11
+      - name: Set up JDK
         uses: actions/setup-java@v4
         with:
-          distribution: 'adopt'
-          java-version: 11
+          distribution: temurin
+          java-version: 21
+          cache: sbt
+      - uses: sbt/setup-sbt@v1
       - name: Release to Sonatype
         run: sbt ciReleaseTagNextVersion ciReleaseSonatype
         env:

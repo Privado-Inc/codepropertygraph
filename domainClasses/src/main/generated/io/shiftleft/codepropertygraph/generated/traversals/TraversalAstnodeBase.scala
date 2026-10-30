@@ -30,21 +30,30 @@ final class TraversalAstnodeBase[NodeType <: nodes.AstNodeBase](val traversal: I
     */
   def codeExact(value: String): Iterator[NodeType] = traversal match {
     case init: flatgraph.misc.InitNodeIterator[flatgraph.GNode @unchecked] if init.isVirgin && init.hasNext =>
-      val someNode = init.next
+      val someNode = init.next()
       flatgraph.Accessors
-        .getWithInverseIndex(someNode.graph, someNode.nodeKind, 10, value)
+        .getWithInverseIndex(someNode.graph, someNode.nodeKind, 8, value)
         .asInstanceOf[Iterator[NodeType]]
     case _ => traversal.filter { _.code == value }
   }
 
   /** Traverse to nodes where code matches one of the elements in `values` exactly.
     */
-  def codeExact(values: String*): Iterator[NodeType] =
-    if (values.length == 1) codeExact(values.head)
-    else {
-      val valueSet = values.toSet
-      traversal.filter { item => valueSet.contains(item.code) }
+  def codeExact(values: String*): Iterator[NodeType] = {
+    if (values.length == 1) return codeExact(values.head)
+    traversal match {
+      case init: flatgraph.misc.InitNodeIterator[flatgraph.GNode @unchecked] if init.isVirgin && init.hasNext =>
+        val someNode = init.next()
+        values.iterator.flatMap { value =>
+          flatgraph.Accessors
+            .getWithInverseIndex(someNode.graph, someNode.nodeKind, 8, value)
+            .asInstanceOf[Iterator[NodeType]]
+        }
+      case _ =>
+        val valueSet = values.toSet
+        traversal.filter { item => valueSet.contains(item.code) }
     }
+  }
 
   /** Traverse to nodes where code does not match the regular expression `value`.
     */
@@ -74,6 +83,19 @@ final class TraversalAstnodeBase[NodeType <: nodes.AstNodeBase](val traversal: I
     traversal.filter { node =>
       val tmp = node.columnNumber; tmp.isDefined && tmp.get == value
     }
+
+  /** Traverse to nodes where the columnNumber equals the given `value`. If `value` is None, only nodes where
+    * columnNumber is not set are included.
+    */
+  def columnNumber(value: Option[Int]): Iterator[NodeType] =
+    value match {
+      case Some(_val) => columnNumber(_val); case None => traversal.filter { node => node.columnNumber.isEmpty }
+    }
+
+  /** Traverse to nodes where the columnNumber equals the given `value`, or no results if `value` is None.
+    */
+  def columnNumberIfPresent(value: Option[Int]): Iterator[NodeType] =
+    value match { case Some(_val) => columnNumber(_val); case None => Iterator.empty }
 
   /** Traverse to nodes where the columnNumber equals at least one of the given `values`
     */
@@ -139,6 +161,19 @@ final class TraversalAstnodeBase[NodeType <: nodes.AstNodeBase](val traversal: I
       val tmp = node.lineNumber; tmp.isDefined && tmp.get == value
     }
 
+  /** Traverse to nodes where the lineNumber equals the given `value`. If `value` is None, only nodes where lineNumber
+    * is not set are included.
+    */
+  def lineNumber(value: Option[Int]): Iterator[NodeType] =
+    value match {
+      case Some(_val) => lineNumber(_val); case None => traversal.filter { node => node.lineNumber.isEmpty }
+    }
+
+  /** Traverse to nodes where the lineNumber equals the given `value`, or no results if `value` is None.
+    */
+  def lineNumberIfPresent(value: Option[Int]): Iterator[NodeType] =
+    value match { case Some(_val) => lineNumber(_val); case None => Iterator.empty }
+
   /** Traverse to nodes where the lineNumber equals at least one of the given `values`
     */
   def lineNumber(values: Int*): Iterator[NodeType] = {
@@ -192,6 +227,156 @@ final class TraversalAstnodeBase[NodeType <: nodes.AstNodeBase](val traversal: I
       val tmp = node.lineNumber; tmp.isDefined && tmp.get <= value
     }
 
+  /** Traverse to offset property */
+  def offset: Iterator[Int] =
+    traversal.flatMap(_.offset)
+
+  /** Traverse to nodes where the offset equals the given `value`
+    */
+  def offset(value: Int): Iterator[NodeType] =
+    traversal.filter { node =>
+      val tmp = node.offset; tmp.isDefined && tmp.get == value
+    }
+
+  /** Traverse to nodes where the offset equals the given `value`. If `value` is None, only nodes where offset is not
+    * set are included.
+    */
+  def offset(value: Option[Int]): Iterator[NodeType] =
+    value match { case Some(_val) => offset(_val); case None => traversal.filter { node => node.offset.isEmpty } }
+
+  /** Traverse to nodes where the offset equals the given `value`, or no results if `value` is None.
+    */
+  def offsetIfPresent(value: Option[Int]): Iterator[NodeType] =
+    value match { case Some(_val) => offset(_val); case None => Iterator.empty }
+
+  /** Traverse to nodes where the offset equals at least one of the given `values`
+    */
+  def offset(values: Int*): Iterator[NodeType] = {
+    val vset = values.toSet
+    traversal.filter { node =>
+      val tmp = node.offset; tmp.isDefined && vset.contains(tmp.get)
+    }
+  }
+
+  /** Traverse to nodes where the offset is not equal to the given `value`
+    */
+  def offsetNot(value: Int): Iterator[NodeType] =
+    traversal.filter { node =>
+      val tmp = node.offset; tmp.isEmpty || tmp.get != value
+    }
+
+  /** Traverse to nodes where the offset does not equal any one of the given `values`
+    */
+  def offsetNot(values: Int*): Iterator[NodeType] = {
+    val vset = values.toSet
+    traversal.filter { node =>
+      val tmp = node.offset; tmp.isEmpty || !vset.contains(tmp.get)
+    }
+  }
+
+  /** Traverse to nodes where the offset is greater than the given `value`
+    */
+  def offsetGt(value: Int): Iterator[NodeType] =
+    traversal.filter { node =>
+      val tmp = node.offset; tmp.isDefined && tmp.get > value
+    }
+
+  /** Traverse to nodes where the offset is greater than or equal the given `value`
+    */
+  def offsetGte(value: Int): Iterator[NodeType] =
+    traversal.filter { node =>
+      val tmp = node.offset; tmp.isDefined && tmp.get >= value
+    }
+
+  /** Traverse to nodes where the offset is less than the given `value`
+    */
+  def offsetLt(value: Int): Iterator[NodeType] =
+    traversal.filter { node =>
+      val tmp = node.offset; tmp.isDefined && tmp.get < value
+    }
+
+  /** Traverse to nodes where the offset is less than or equal the given `value`
+    */
+  def offsetLte(value: Int): Iterator[NodeType] =
+    traversal.filter { node =>
+      val tmp = node.offset; tmp.isDefined && tmp.get <= value
+    }
+
+  /** Traverse to offsetEnd property */
+  def offsetEnd: Iterator[Int] =
+    traversal.flatMap(_.offsetEnd)
+
+  /** Traverse to nodes where the offsetEnd equals the given `value`
+    */
+  def offsetEnd(value: Int): Iterator[NodeType] =
+    traversal.filter { node =>
+      val tmp = node.offsetEnd; tmp.isDefined && tmp.get == value
+    }
+
+  /** Traverse to nodes where the offsetEnd equals the given `value`. If `value` is None, only nodes where offsetEnd is
+    * not set are included.
+    */
+  def offsetEnd(value: Option[Int]): Iterator[NodeType] =
+    value match { case Some(_val) => offsetEnd(_val); case None => traversal.filter { node => node.offsetEnd.isEmpty } }
+
+  /** Traverse to nodes where the offsetEnd equals the given `value`, or no results if `value` is None.
+    */
+  def offsetEndIfPresent(value: Option[Int]): Iterator[NodeType] =
+    value match { case Some(_val) => offsetEnd(_val); case None => Iterator.empty }
+
+  /** Traverse to nodes where the offsetEnd equals at least one of the given `values`
+    */
+  def offsetEnd(values: Int*): Iterator[NodeType] = {
+    val vset = values.toSet
+    traversal.filter { node =>
+      val tmp = node.offsetEnd; tmp.isDefined && vset.contains(tmp.get)
+    }
+  }
+
+  /** Traverse to nodes where the offsetEnd is not equal to the given `value`
+    */
+  def offsetEndNot(value: Int): Iterator[NodeType] =
+    traversal.filter { node =>
+      val tmp = node.offsetEnd; tmp.isEmpty || tmp.get != value
+    }
+
+  /** Traverse to nodes where the offsetEnd does not equal any one of the given `values`
+    */
+  def offsetEndNot(values: Int*): Iterator[NodeType] = {
+    val vset = values.toSet
+    traversal.filter { node =>
+      val tmp = node.offsetEnd; tmp.isEmpty || !vset.contains(tmp.get)
+    }
+  }
+
+  /** Traverse to nodes where the offsetEnd is greater than the given `value`
+    */
+  def offsetEndGt(value: Int): Iterator[NodeType] =
+    traversal.filter { node =>
+      val tmp = node.offsetEnd; tmp.isDefined && tmp.get > value
+    }
+
+  /** Traverse to nodes where the offsetEnd is greater than or equal the given `value`
+    */
+  def offsetEndGte(value: Int): Iterator[NodeType] =
+    traversal.filter { node =>
+      val tmp = node.offsetEnd; tmp.isDefined && tmp.get >= value
+    }
+
+  /** Traverse to nodes where the offsetEnd is less than the given `value`
+    */
+  def offsetEndLt(value: Int): Iterator[NodeType] =
+    traversal.filter { node =>
+      val tmp = node.offsetEnd; tmp.isDefined && tmp.get < value
+    }
+
+  /** Traverse to nodes where the offsetEnd is less than or equal the given `value`
+    */
+  def offsetEndLte(value: Int): Iterator[NodeType] =
+    traversal.filter { node =>
+      val tmp = node.offsetEnd; tmp.isDefined && tmp.get <= value
+    }
+
   /** Traverse to order property */
   def order: Iterator[Int] =
     traversal.map(_.order)
@@ -200,6 +385,11 @@ final class TraversalAstnodeBase[NodeType <: nodes.AstNodeBase](val traversal: I
     */
   def order(value: Int): Iterator[NodeType] =
     traversal.filter { _.order == value }
+
+  /** Traverse to nodes where the order equals the given `value`, or no results if `value` is None
+    */
+  def order(value: Option[Int]): Iterator[NodeType] =
+    value match { case Some(_val) => order(_val); case None => Iterator.empty }
 
   /** Traverse to nodes where the order equals at least one of the given `values`
     */

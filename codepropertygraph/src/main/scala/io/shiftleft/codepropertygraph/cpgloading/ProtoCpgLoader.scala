@@ -41,11 +41,11 @@ object ProtoCpgLoader {
     implicit val interner: StringInterner = StringInterner.makeStrongInterner()
     val protoToGraphNodeMappings          = new ProtoToGraphNodeMappings
     val cpg                               = openOrCreateCpg(storagePath)
+    var edgeCount                         = 0
+    var propCount                         = 0
 
     // first pass: add the raw nodes without any properties or edges
-    protoCpgs().foreach { cpgProto =>
-      addNodesRaw(nodesIter(cpgProto), cpg.graph, protoToGraphNodeMappings)
-    }
+    addNodesRaw(protoCpgs().flatMap(cpgProto => nodesIter(cpgProto)), cpg.graph, protoToGraphNodeMappings)
 
     // second pass: set node properties and add edges
     val diffGraph = Cpg.newDiffGraphBuilder
@@ -56,6 +56,7 @@ object ProtoCpgLoader {
           .findGNode(protoNode)
           .getOrElse(throw new ConversionException(s"node with proto node id=$protoNodeId not found in graph"))
         protoNode.getPropertyList.iterator().asScala.foreach { protoProperty =>
+          propCount += 1
           diffGraph.setNodeProperty(gNode, protoProperty.getName.name(), extractPropertyValue(protoProperty.getValue()))
         }
       }
@@ -63,6 +64,7 @@ object ProtoCpgLoader {
       protoCpg.getEdgeList.iterator().asScala.foreach { protoEdge =>
         List(protoEdge.getSrc, protoEdge.getDst).map(protoToGraphNodeMappings.findGNode) match {
           case List(Some(srcNode), Some(dstNode)) =>
+            edgeCount += 1
             diffGraph.addEdge(srcNode, dstNode, protoEdge.getType.name(), extractEdgePropertyValue(protoEdge))
           case _ => // at least one of the nodes doesn't exist in the cpg, most likely because it was filtered out - ignore
         }
@@ -70,6 +72,7 @@ object ProtoCpgLoader {
     }
 
     DiffGraphApplier.applyDiff(cpg.graph, diffGraph)
+    logger.debug(s"Loaded proto graph with ${cpg.graph.nodeCount} nodes, $edgeCount edges, $propCount properties")
     cpg
   }
 
@@ -133,7 +136,7 @@ object ProtoCpgLoader {
   def loadOverlays(fileName: String): Try[Iterator[CpgOverlay]] =
     loadOverlays(fileName, CpgOverlay.parseFrom)
 
-  private def loadOverlays[T <: GeneratedMessageV3](fileName: String, f: InputStream => T): Try[Iterator[T]] =
+  private def loadOverlays(fileName: String, f: InputStream => CpgOverlay): Try[Iterator[CpgOverlay]] =
     Using(new ZipArchive(fileName)) { zip =>
       zip.entries
         .sortWith(compareOverlayPath)

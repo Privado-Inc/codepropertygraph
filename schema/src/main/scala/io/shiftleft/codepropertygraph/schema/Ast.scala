@@ -65,7 +65,7 @@ object Ast extends SchemaBase {
             |""".stripMargin
       )
       .mandatory(-1)
-      .protoId(4)
+      .protoId(ProtoIds.Order)
 
     val astNode = builder
       .addNodeBaseType(
@@ -81,10 +81,14 @@ object Ast extends SchemaBase {
                     |start column number of the code represented by the node.
                     |For machine-code-based and bytecode-based frontends, `LINE_NUMBER` contains
                     |the address at which the code starts while `COLUMN_NUMBER` is undefined.
+                    |
+                    |The optional `OFFSET` and `OFFSET_END` specify the start
+                    |and exclusive end position of the code belonging to a node within the corresponding
+                    |`FILE` nodes `CONTENT` property.
                     |""".stripMargin
       )
       .addProperties(order, code)
-      .addProperties(lineNumber, columnNumber)
+      .addProperties(lineNumber, columnNumber, offset, offsetEnd)
 
     // The following nodes from other schemas are AST nodes
 
@@ -116,7 +120,7 @@ object Ast extends SchemaBase {
                     |"block expression") to describe what in the CPG we call "Block".
                     |""".stripMargin
       )
-      .protoId(31)
+      .protoId(ProtoIds.Block)
       .addProperties(typeFullName)
 
     val literal: NodeType = builder
@@ -128,7 +132,7 @@ object Ast extends SchemaBase {
             |e.g., `java.lang.Integer`.
             |""".stripMargin
       )
-      .protoId(8)
+      .protoId(ProtoIds.Literal)
       .addProperties(typeFullName)
       .primaryKey(code)
 
@@ -141,7 +145,7 @@ object Ast extends SchemaBase {
             |`int x = 10;`, it contains `int x`.
             |""".stripMargin
       )
-      .protoId(23)
+      .protoId(ProtoIds.Local)
       .addProperties(typeFullName)
       .extendz(declaration, astNode)
       .primaryKey(name)
@@ -154,7 +158,7 @@ object Ast extends SchemaBase {
             |name in `TYPE_FULL_NAME`.
             |""".stripMargin
       )
-      .protoId(27)
+      .protoId(ProtoIds.Identifier)
       .addProperties(typeFullName, name)
       .primaryKey(name)
 
@@ -172,7 +176,7 @@ object Ast extends SchemaBase {
                     |""".stripMargin
       )
       .mandatory(PropertyDefaults.String)
-      .protoId(2001092)
+      .protoId(ProtoIds.CanonicalName)
 
     val fieldIdentifier: NodeType = builder
       .addNodeType(
@@ -189,7 +193,7 @@ object Ast extends SchemaBase {
                     |it.
                     |""".stripMargin
       )
-      .protoId(2001081)
+      .protoId(ProtoIds.FieldIdentifier)
       .addProperties(canonicalName)
 
     val modifierType = builder
@@ -201,40 +205,40 @@ object Ast extends SchemaBase {
             |""".stripMargin
       )
       .mandatory(PropertyDefaults.String)
-      .protoId(26)
+      .protoId(ProtoIds.ModifierType)
 
     val modifierTypes = builder.addConstants(
       category = "ModifierTypes",
       Constant(name = "STATIC", value = "STATIC", valueType = ValueType.String, comment = "The static modifier")
-        .protoId(1),
+        .protoId(ProtoIds.Static),
       Constant(name = "PUBLIC", value = "PUBLIC", valueType = ValueType.String, comment = "The public modifier")
-        .protoId(2),
+        .protoId(ProtoIds.Public),
       Constant(
         name = "PROTECTED",
         value = "PROTECTED",
         valueType = ValueType.String,
         comment = "The protected modifier"
-      ).protoId(3),
+      ).protoId(ProtoIds.Protected),
       Constant(name = "PRIVATE", value = "PRIVATE", valueType = ValueType.String, comment = "The private modifier")
-        .protoId(4),
+        .protoId(ProtoIds.Private),
       Constant(name = "ABSTRACT", value = "ABSTRACT", valueType = ValueType.String, comment = "The abstract modifier")
-        .protoId(5),
+        .protoId(ProtoIds.Abstract),
       Constant(name = "NATIVE", value = "NATIVE", valueType = ValueType.String, comment = "The native modifier")
-        .protoId(6),
+        .protoId(ProtoIds.Native),
       Constant(
         name = "CONSTRUCTOR",
         value = "CONSTRUCTOR",
         valueType = ValueType.String,
         comment = "The constructor modifier"
-      ).protoId(7),
+      ).protoId(ProtoIds.Constructor),
       Constant(name = "VIRTUAL", value = "VIRTUAL", valueType = ValueType.String, comment = "The virtual modifier")
-        .protoId(8),
+        .protoId(ProtoIds.Virtual),
       Constant(name = "INTERNAL", value = "INTERNAL", valueType = ValueType.String, comment = "The internal modifier")
-        .protoId(9),
+        .protoId(ProtoIds.Internal),
       Constant(name = "FINAL", value = "FINAL", valueType = ValueType.String, comment = "The final modifier")
-        .protoId(10),
+        .protoId(ProtoIds.Final),
       Constant(name = "READONLY", value = "READONLY", valueType = ValueType.String, comment = "The readonly modifier")
-        .protoId(11),
+        .protoId(ProtoIds.ReadOnly),
       Constant(
         name = "MODULE",
         value = "MODULE",
@@ -242,14 +246,14 @@ object Ast extends SchemaBase {
         comment =
           "Indicate that a method defines a module in the sense e.g. a python module does with the creation of a module object"
       )
-        .protoId(12),
+        .protoId(ProtoIds.Module),
       Constant(
         name = "LAMBDA",
         value = "LAMBDA",
         valueType = ValueType.String,
         comment = "Indicate that a method is an anonymous function, lambda, or closure"
       )
-        .protoId(13)
+        .protoId(ProtoIds.Lambda)
     )
 
     val modifier: NodeType = builder
@@ -260,7 +264,7 @@ object Ast extends SchemaBase {
             |cannot be evaluated and cannot be passed as an argument in function calls.
             |""".stripMargin
       )
-      .protoId(300)
+      .protoId(ProtoIds.Modifier)
       .addProperties(modifierType)
       .extendz(astNode)
 
@@ -273,7 +277,7 @@ object Ast extends SchemaBase {
             |that this jump target is created from, e.g., "Label".
             |""".stripMargin
       )
-      .protoId(340)
+      .protoId(ProtoIds.JumpTarget)
       .addProperties(name, parserTypeName)
       .extendz(astNode)
 
@@ -286,7 +290,7 @@ object Ast extends SchemaBase {
                     |label is created from, e.g., "Label".
                     |""".stripMargin
       )
-      .protoId(341)
+      .protoId(ProtoIds.JumpLabel)
       .addProperties(name, parserTypeName)
       .extendz(astNode)
 
@@ -299,12 +303,12 @@ object Ast extends SchemaBase {
             |`TYPE_FULL_NAME` holds its fully-qualified type name.
             |""".stripMargin
       )
-      .protoId(333)
+      .protoId(ProtoIds.MethodRef)
       .addProperties(typeFullName)
 
     val typeRef: NodeType = builder
       .addNodeType(name = "TYPE_REF", comment = "Reference to a type/class")
-      .protoId(335)
+      .protoId(ProtoIds.TypeRef)
       .addProperties(typeFullName)
 
     val ret: NodeType = builder
@@ -315,7 +319,7 @@ object Ast extends SchemaBase {
             |represented via `METHOD_RETURN` nodes.
             |""".stripMargin
       )
-      .protoId(30)
+      .protoId(ProtoIds.Return)
       .starterName("ret")
       .primaryKey(code)
 
@@ -329,7 +333,7 @@ object Ast extends SchemaBase {
             |""".stripMargin
       )
       .mandatory(PropertyDefaults.String)
-      .protoId(27)
+      .protoId(ProtoIds.ControlStructureType)
 
     val controlStructureTypes = builder.addConstants(
       category = "ControlStructureTypes",
@@ -339,49 +343,49 @@ object Ast extends SchemaBase {
         valueType = ValueType.String,
         comment = """Represents a break statement. Labeled breaks are expected to have a JUMP_LABEL
             |node AST child with ORDER 1""".stripMargin
-      ).protoId(1),
+      ).protoId(ProtoIds.Break),
       Constant(
         name = "CONTINUE",
         value = "CONTINUE",
         valueType = ValueType.String,
         comment = """Represents a continue statement. Labeled continues are expected to have a JUMP_LABEL
                            |node AST child with ORDER 1""".stripMargin
-      ).protoId(2),
+      ).protoId(ProtoIds.Continue),
       Constant(name = "WHILE", value = "WHILE", valueType = ValueType.String, comment = "Represents a while statement")
-        .protoId(3),
+        .protoId(ProtoIds.While),
       Constant(name = "DO", value = "DO", valueType = ValueType.String, comment = "Represents a do statement")
-        .protoId(4),
+        .protoId(ProtoIds.Do),
       Constant(name = "FOR", value = "FOR", valueType = ValueType.String, comment = "Represents a for statement")
-        .protoId(5),
+        .protoId(ProtoIds.For),
       Constant(name = "GOTO", value = "GOTO", valueType = ValueType.String, comment = "Represents a goto statement")
-        .protoId(6),
+        .protoId(ProtoIds.Goto),
       Constant(name = "IF", value = "IF", valueType = ValueType.String, comment = "Represents an if statement")
-        .protoId(7),
+        .protoId(ProtoIds.If),
       Constant(name = "ELSE", value = "ELSE", valueType = ValueType.String, comment = "Represents an else statement")
-        .protoId(8),
+        .protoId(ProtoIds.Else),
       Constant(
         name = "SWITCH",
         value = "SWITCH",
         valueType = ValueType.String,
         comment = "Represents a switch statement"
-      ).protoId(9),
+      ).protoId(ProtoIds.Switch),
       Constant(name = "TRY", value = "TRY", valueType = ValueType.String, comment = "Represents a try statement")
-        .protoId(10),
+        .protoId(ProtoIds.Try),
       Constant(name = "THROW", value = "THROW", valueType = ValueType.String, comment = "Represents a throw statement")
-        .protoId(11),
+        .protoId(ProtoIds.Throw),
       Constant(name = "MATCH", value = "MATCH", valueType = ValueType.String, comment = "Represents a match expression")
-        .protoId(12),
+        .protoId(ProtoIds.Match),
       Constant(name = "YIELD", value = "YIELD", valueType = ValueType.String, comment = "Represents a yield expression")
-        .protoId(13),
+        .protoId(ProtoIds.Yield),
       Constant(name = "CATCH", value = "CATCH", valueType = ValueType.String, comment = "Represents a catch clause")
-        .protoId(14),
+        .protoId(ProtoIds.Catch),
       Constant(
         name = "FINALLY",
         value = "FINALLY",
         valueType = ValueType.String,
         comment = "Represents a finally clause"
       )
-        .protoId(15)
+        .protoId(ProtoIds.Finally)
     )
 
     val controlStructure: NodeType = builder
@@ -399,7 +403,7 @@ object Ast extends SchemaBase {
             |for construction of the control flow layer.
             |""".stripMargin
       )
-      .protoId(339)
+      .protoId(ProtoIds.ControlStructure)
       .addProperties(parserTypeName, controlStructureType)
 
     val unknown: NodeType = builder
@@ -410,21 +414,79 @@ object Ast extends SchemaBase {
             |included using a node of type `UNKNOWN`.
             |""".stripMargin
       )
-      .protoId(44)
+      .protoId(ProtoIds.Unknown)
       .addProperties(parserTypeName, typeFullName)
 
     // Edge types
 
     val ast = builder
       .addEdgeType(name = "AST", comment = "This edge connects a parent node to its child in the syntax tree.")
-      .protoId(3)
+      .protoId(ProtoIds.Ast)
 
     val condition = builder
       .addEdgeType(
         name = "CONDITION",
         comment = "The edge connects control structure nodes to the expressions that holds their conditions."
       )
-      .protoId(56)
+      .protoId(ProtoIds.Condition)
+
+    val trueBody = builder
+      .addEdgeType(name = "TRUE_BODY", comment = "The edge connects control structure nodes to their true branch/body.")
+      .protoId(ProtoIds.TrueBody)
+
+    val falseBody = builder
+      .addEdgeType(
+        name = "FALSE_BODY",
+        comment = "The edge connects control structure nodes to their false branch/body."
+      )
+      .protoId(ProtoIds.FalseBody)
+
+    val doBody = builder
+      .addEdgeType(name = "DO_BODY", comment = "The edge connects do-while control structure nodes to their body.")
+      .protoId(ProtoIds.DoBody)
+
+    val forInit = builder
+      .addEdgeType(
+        name = "FOR_INIT",
+        comment = "The edge connects for-loop control structure nodes to their initialization expression(s)."
+      )
+      .protoId(ProtoIds.ForInit)
+
+    val forUpdate = builder
+      .addEdgeType(
+        name = "FOR_UPDATE",
+        comment = "The edge connects for-loop control structure nodes to their update/step expression(s)."
+      )
+      .protoId(ProtoIds.ForUpdate)
+
+    val forBody = builder
+      .addEdgeType(name = "FOR_BODY", comment = "The edge connects for-loop control structure nodes to their body.")
+      .protoId(ProtoIds.ForBody)
+
+    val tryBody = builder
+      .addEdgeType(name = "TRY_BODY", comment = "The edge connects try control structure nodes to their try body.")
+      .protoId(ProtoIds.TryBody)
+
+    val catchBody = builder
+      .addEdgeType(
+        name = "CATCH_BODY",
+        comment = "The edge connects try control structure nodes to catch/handler bodies."
+      )
+      .protoId(ProtoIds.CatchBody)
+
+    val finallyBody = builder
+      .addEdgeType(
+        name = "FINALLY_BODY",
+        comment = "The edge connects try control structure nodes to their finally body."
+      )
+      .protoId(ProtoIds.FinallyBody)
+
+    val jumpArgument = builder
+      .addEdgeType(
+        name = "JUMP_ARGUMENT",
+        comment = "The edge connects jump-like control structures to the node encoding their jump target."
+      )
+      .protoId(ProtoIds.JumpArgument)
 
     file.addOutEdge(edge = ast, inNode = namespaceBlock, cardinalityIn = Cardinality.ZeroOrOne)
 
@@ -548,6 +610,109 @@ object Ast extends SchemaBase {
       .addOutEdge(edge = condition, inNode = unknown)
       .addOutEdge(edge = condition, inNode = controlStructure)
 
+    controlStructure
+      .addOutEdge(edge = trueBody, inNode = literal)
+      .addOutEdge(edge = trueBody, inNode = identifier)
+      .addOutEdge(edge = trueBody, inNode = ret)
+      .addOutEdge(edge = trueBody, inNode = block)
+      .addOutEdge(edge = trueBody, inNode = methodRef)
+      .addOutEdge(edge = trueBody, inNode = typeRef)
+      .addOutEdge(edge = trueBody, inNode = controlStructure)
+      .addOutEdge(edge = trueBody, inNode = jumpTarget)
+      .addOutEdge(edge = trueBody, inNode = unknown)
+
+    controlStructure
+      .addOutEdge(edge = falseBody, inNode = literal)
+      .addOutEdge(edge = falseBody, inNode = identifier)
+      .addOutEdge(edge = falseBody, inNode = ret)
+      .addOutEdge(edge = falseBody, inNode = block)
+      .addOutEdge(edge = falseBody, inNode = methodRef)
+      .addOutEdge(edge = falseBody, inNode = typeRef)
+      .addOutEdge(edge = falseBody, inNode = controlStructure)
+      .addOutEdge(edge = falseBody, inNode = jumpTarget)
+      .addOutEdge(edge = falseBody, inNode = unknown)
+
+    controlStructure
+      .addOutEdge(edge = doBody, inNode = literal)
+      .addOutEdge(edge = doBody, inNode = identifier)
+      .addOutEdge(edge = doBody, inNode = ret)
+      .addOutEdge(edge = doBody, inNode = block)
+      .addOutEdge(edge = doBody, inNode = methodRef)
+      .addOutEdge(edge = doBody, inNode = typeRef)
+      .addOutEdge(edge = doBody, inNode = controlStructure)
+      .addOutEdge(edge = doBody, inNode = jumpTarget)
+      .addOutEdge(edge = doBody, inNode = unknown)
+
+    controlStructure
+      .addOutEdge(edge = forInit, inNode = literal)
+      .addOutEdge(edge = forInit, inNode = identifier)
+      .addOutEdge(edge = forInit, inNode = ret)
+      .addOutEdge(edge = forInit, inNode = block)
+      .addOutEdge(edge = forInit, inNode = methodRef)
+      .addOutEdge(edge = forInit, inNode = typeRef)
+      .addOutEdge(edge = forInit, inNode = controlStructure)
+      .addOutEdge(edge = forInit, inNode = jumpTarget)
+      .addOutEdge(edge = forInit, inNode = unknown)
+
+    controlStructure
+      .addOutEdge(edge = forUpdate, inNode = literal)
+      .addOutEdge(edge = forUpdate, inNode = identifier)
+      .addOutEdge(edge = forUpdate, inNode = ret)
+      .addOutEdge(edge = forUpdate, inNode = block)
+      .addOutEdge(edge = forUpdate, inNode = methodRef)
+      .addOutEdge(edge = forUpdate, inNode = typeRef)
+      .addOutEdge(edge = forUpdate, inNode = controlStructure)
+      .addOutEdge(edge = forUpdate, inNode = jumpTarget)
+      .addOutEdge(edge = forUpdate, inNode = unknown)
+
+    controlStructure
+      .addOutEdge(edge = forBody, inNode = literal)
+      .addOutEdge(edge = forBody, inNode = identifier)
+      .addOutEdge(edge = forBody, inNode = ret)
+      .addOutEdge(edge = forBody, inNode = block)
+      .addOutEdge(edge = forBody, inNode = methodRef)
+      .addOutEdge(edge = forBody, inNode = typeRef)
+      .addOutEdge(edge = forBody, inNode = controlStructure)
+      .addOutEdge(edge = forBody, inNode = jumpTarget)
+      .addOutEdge(edge = forBody, inNode = unknown)
+
+    controlStructure
+      .addOutEdge(edge = tryBody, inNode = literal)
+      .addOutEdge(edge = tryBody, inNode = identifier)
+      .addOutEdge(edge = tryBody, inNode = ret)
+      .addOutEdge(edge = tryBody, inNode = block)
+      .addOutEdge(edge = tryBody, inNode = methodRef)
+      .addOutEdge(edge = tryBody, inNode = typeRef)
+      .addOutEdge(edge = tryBody, inNode = controlStructure)
+      .addOutEdge(edge = tryBody, inNode = jumpTarget)
+      .addOutEdge(edge = tryBody, inNode = unknown)
+
+    controlStructure
+      .addOutEdge(edge = catchBody, inNode = literal)
+      .addOutEdge(edge = catchBody, inNode = identifier)
+      .addOutEdge(edge = catchBody, inNode = ret)
+      .addOutEdge(edge = catchBody, inNode = block)
+      .addOutEdge(edge = catchBody, inNode = methodRef)
+      .addOutEdge(edge = catchBody, inNode = typeRef)
+      .addOutEdge(edge = catchBody, inNode = controlStructure)
+      .addOutEdge(edge = catchBody, inNode = jumpTarget)
+      .addOutEdge(edge = catchBody, inNode = unknown)
+
+    controlStructure
+      .addOutEdge(edge = finallyBody, inNode = literal)
+      .addOutEdge(edge = finallyBody, inNode = identifier)
+      .addOutEdge(edge = finallyBody, inNode = ret)
+      .addOutEdge(edge = finallyBody, inNode = block)
+      .addOutEdge(edge = finallyBody, inNode = methodRef)
+      .addOutEdge(edge = finallyBody, inNode = typeRef)
+      .addOutEdge(edge = finallyBody, inNode = controlStructure)
+      .addOutEdge(edge = finallyBody, inNode = jumpTarget)
+      .addOutEdge(edge = finallyBody, inNode = unknown)
+
+    controlStructure
+      .addOutEdge(edge = jumpArgument, inNode = literal)
+      .addOutEdge(edge = jumpArgument, inNode = jumpLabel)
+
     typeDecl
       .addOutEdge(edge = ast, inNode = typeDecl, cardinalityIn = Cardinality.ZeroOrOne)
       .addOutEdge(edge = ast, inNode = method, cardinalityIn = Cardinality.ZeroOrOne)
@@ -578,7 +743,7 @@ object Ast extends SchemaBase {
                     |any information we may have about the types of arguments and return value.
                     |""".stripMargin
       )
-      .protoId(15)
+      .protoId(ProtoIds.CallNode)
       .extendz(callRepr)
       .addProperties(typeFullName)
       .primaryKey(name)
@@ -624,6 +789,15 @@ object Ast extends SchemaBase {
     controlStructure.addOutEdge(edge = ast, inNode = callNode, cardinalityIn = Cardinality.One)
     unknown.addOutEdge(edge = ast, inNode = callNode)
     controlStructure.addOutEdge(edge = condition, inNode = callNode)
+    controlStructure.addOutEdge(edge = trueBody, inNode = callNode)
+    controlStructure.addOutEdge(edge = falseBody, inNode = callNode)
+    controlStructure.addOutEdge(edge = doBody, inNode = callNode)
+    controlStructure.addOutEdge(edge = forInit, inNode = callNode)
+    controlStructure.addOutEdge(edge = forUpdate, inNode = callNode)
+    controlStructure.addOutEdge(edge = forBody, inNode = callNode)
+    controlStructure.addOutEdge(edge = tryBody, inNode = callNode)
+    controlStructure.addOutEdge(edge = catchBody, inNode = callNode)
+    controlStructure.addOutEdge(edge = finallyBody, inNode = callNode)
 
     block.addOutEdge(edge = ast, inNode = callNode)
 

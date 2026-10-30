@@ -6,7 +6,7 @@ object AliasOf {
 }
 
 class AliasOf(src_4762: flatgraph.GNode, dst_4762: flatgraph.GNode, subSeq_4862: Int, property_4862: Any)
-    extends flatgraph.Edge(src_4762, dst_4762, 0.toShort, subSeq_4862, property_4862) {}
+    extends flatgraph.Edge(src_4762, dst_4762, 0, subSeq_4862, property_4862) {}
 
 object Argument {
   val Label = "ARGUMENT"
@@ -14,7 +14,7 @@ object Argument {
 }
 
 class Argument(src_4762: flatgraph.GNode, dst_4762: flatgraph.GNode, subSeq_4862: Int, property_4862: Any)
-    extends flatgraph.Edge(src_4762, dst_4762, 1.toShort, subSeq_4862, property_4862) {}
+    extends flatgraph.Edge(src_4762, dst_4762, 1, subSeq_4862, property_4862) {}
 
 object Ast {
   val Label = "AST"
@@ -22,7 +22,7 @@ object Ast {
 }
 
 class Ast(src_4762: flatgraph.GNode, dst_4762: flatgraph.GNode, subSeq_4862: Int, property_4862: Any)
-    extends flatgraph.Edge(src_4762, dst_4762, 2.toShort, subSeq_4862, property_4862) {}
+    extends flatgraph.Edge(src_4762, dst_4762, 2, subSeq_4862, property_4862) {}
 
 object Binds {
   val Label = "BINDS"
@@ -30,7 +30,7 @@ object Binds {
 }
 
 class Binds(src_4762: flatgraph.GNode, dst_4762: flatgraph.GNode, subSeq_4862: Int, property_4862: Any)
-    extends flatgraph.Edge(src_4762, dst_4762, 3.toShort, subSeq_4862, property_4862) {}
+    extends flatgraph.Edge(src_4762, dst_4762, 3, subSeq_4862, property_4862) {}
 
 object BindsTo {
   val Label = "BINDS_TO"
@@ -38,7 +38,7 @@ object BindsTo {
 }
 
 class BindsTo(src_4762: flatgraph.GNode, dst_4762: flatgraph.GNode, subSeq_4862: Int, property_4862: Any)
-    extends flatgraph.Edge(src_4762, dst_4762, 4.toShort, subSeq_4862, property_4862) {}
+    extends flatgraph.Edge(src_4762, dst_4762, 4, subSeq_4862, property_4862) {}
 
 object Call {
   val Label = "CALL"
@@ -46,7 +46,7 @@ object Call {
 }
 
 class Call(src_4762: flatgraph.GNode, dst_4762: flatgraph.GNode, subSeq_4862: Int, property_4862: Any)
-    extends flatgraph.Edge(src_4762, dst_4762, 5.toShort, subSeq_4862, property_4862) {}
+    extends flatgraph.Edge(src_4762, dst_4762, 5, subSeq_4862, property_4862) {}
 
 object Capture {
   val Label = "CAPTURE"
@@ -54,7 +54,7 @@ object Capture {
 }
 
 class Capture(src_4762: flatgraph.GNode, dst_4762: flatgraph.GNode, subSeq_4862: Int, property_4862: Any)
-    extends flatgraph.Edge(src_4762, dst_4762, 6.toShort, subSeq_4862, property_4862) {}
+    extends flatgraph.Edge(src_4762, dst_4762, 6, subSeq_4862, property_4862) {}
 
 object CapturedBy {
   val Label = "CAPTURED_BY"
@@ -62,7 +62,15 @@ object CapturedBy {
 }
 
 class CapturedBy(src_4762: flatgraph.GNode, dst_4762: flatgraph.GNode, subSeq_4862: Int, property_4862: Any)
-    extends flatgraph.Edge(src_4762, dst_4762, 7.toShort, subSeq_4862, property_4862) {}
+    extends flatgraph.Edge(src_4762, dst_4762, 7, subSeq_4862, property_4862) {}
+
+object CatchBody {
+  val Label = "CATCH_BODY"
+
+}
+
+class CatchBody(src_4762: flatgraph.GNode, dst_4762: flatgraph.GNode, subSeq_4862: Int, property_4862: Any)
+    extends flatgraph.Edge(src_4762, dst_4762, 8, subSeq_4862, property_4862) {}
 
 object Cdg {
   val Label = "CDG"
@@ -70,7 +78,7 @@ object Cdg {
 }
 
 class Cdg(src_4762: flatgraph.GNode, dst_4762: flatgraph.GNode, subSeq_4862: Int, property_4862: Any)
-    extends flatgraph.Edge(src_4762, dst_4762, 8.toShort, subSeq_4862, property_4862) {}
+    extends flatgraph.Edge(src_4762, dst_4762, 9, subSeq_4862, property_4862) {}
 
 object Cfg {
   val Label = "CFG"
@@ -78,7 +86,7 @@ object Cfg {
 }
 
 class Cfg(src_4762: flatgraph.GNode, dst_4762: flatgraph.GNode, subSeq_4862: Int, property_4862: Any)
-    extends flatgraph.Edge(src_4762, dst_4762, 9.toShort, subSeq_4862, property_4862) {}
+    extends flatgraph.Edge(src_4762, dst_4762, 10, subSeq_4862, property_4862) {}
 
 object Condition {
   val Label = "CONDITION"
@@ -86,7 +94,7 @@ object Condition {
 }
 
 class Condition(src_4762: flatgraph.GNode, dst_4762: flatgraph.GNode, subSeq_4862: Int, property_4862: Any)
-    extends flatgraph.Edge(src_4762, dst_4762, 10.toShort, subSeq_4862, property_4862) {}
+    extends flatgraph.Edge(src_4762, dst_4762, 11, subSeq_4862, property_4862) {}
 
 object Contains {
   val Label = "CONTAINS"
@@ -94,7 +102,7 @@ object Contains {
 }
 
 class Contains(src_4762: flatgraph.GNode, dst_4762: flatgraph.GNode, subSeq_4862: Int, property_4862: Any)
-    extends flatgraph.Edge(src_4762, dst_4762, 11.toShort, subSeq_4862, property_4862) {}
+    extends flatgraph.Edge(src_4762, dst_4762, 12, subSeq_4862, property_4862) {}
 
 object Dominate {
   val Label = "DOMINATE"
@@ -102,7 +110,15 @@ object Dominate {
 }
 
 class Dominate(src_4762: flatgraph.GNode, dst_4762: flatgraph.GNode, subSeq_4862: Int, property_4862: Any)
-    extends flatgraph.Edge(src_4762, dst_4762, 12.toShort, subSeq_4862, property_4862) {}
+    extends flatgraph.Edge(src_4762, dst_4762, 13, subSeq_4862, property_4862) {}
+
+object DoBody {
+  val Label = "DO_BODY"
+
+}
+
+class DoBody(src_4762: flatgraph.GNode, dst_4762: flatgraph.GNode, subSeq_4862: Int, property_4862: Any)
+    extends flatgraph.Edge(src_4762, dst_4762, 14, subSeq_4862, property_4862) {}
 
 object EvalType {
   val Label = "EVAL_TYPE"
@@ -110,7 +126,47 @@ object EvalType {
 }
 
 class EvalType(src_4762: flatgraph.GNode, dst_4762: flatgraph.GNode, subSeq_4862: Int, property_4862: Any)
-    extends flatgraph.Edge(src_4762, dst_4762, 13.toShort, subSeq_4862, property_4862) {}
+    extends flatgraph.Edge(src_4762, dst_4762, 15, subSeq_4862, property_4862) {}
+
+object FalseBody {
+  val Label = "FALSE_BODY"
+
+}
+
+class FalseBody(src_4762: flatgraph.GNode, dst_4762: flatgraph.GNode, subSeq_4862: Int, property_4862: Any)
+    extends flatgraph.Edge(src_4762, dst_4762, 16, subSeq_4862, property_4862) {}
+
+object FinallyBody {
+  val Label = "FINALLY_BODY"
+
+}
+
+class FinallyBody(src_4762: flatgraph.GNode, dst_4762: flatgraph.GNode, subSeq_4862: Int, property_4862: Any)
+    extends flatgraph.Edge(src_4762, dst_4762, 17, subSeq_4862, property_4862) {}
+
+object ForBody {
+  val Label = "FOR_BODY"
+
+}
+
+class ForBody(src_4762: flatgraph.GNode, dst_4762: flatgraph.GNode, subSeq_4862: Int, property_4862: Any)
+    extends flatgraph.Edge(src_4762, dst_4762, 18, subSeq_4862, property_4862) {}
+
+object ForInit {
+  val Label = "FOR_INIT"
+
+}
+
+class ForInit(src_4762: flatgraph.GNode, dst_4762: flatgraph.GNode, subSeq_4862: Int, property_4862: Any)
+    extends flatgraph.Edge(src_4762, dst_4762, 19, subSeq_4862, property_4862) {}
+
+object ForUpdate {
+  val Label = "FOR_UPDATE"
+
+}
+
+class ForUpdate(src_4762: flatgraph.GNode, dst_4762: flatgraph.GNode, subSeq_4862: Int, property_4862: Any)
+    extends flatgraph.Edge(src_4762, dst_4762, 20, subSeq_4862, property_4862) {}
 
 object Imports {
   val Label = "IMPORTS"
@@ -118,7 +174,7 @@ object Imports {
 }
 
 class Imports(src_4762: flatgraph.GNode, dst_4762: flatgraph.GNode, subSeq_4862: Int, property_4862: Any)
-    extends flatgraph.Edge(src_4762, dst_4762, 14.toShort, subSeq_4862, property_4862) {}
+    extends flatgraph.Edge(src_4762, dst_4762, 21, subSeq_4862, property_4862) {}
 
 object InheritsFrom {
   val Label = "INHERITS_FROM"
@@ -126,7 +182,7 @@ object InheritsFrom {
 }
 
 class InheritsFrom(src_4762: flatgraph.GNode, dst_4762: flatgraph.GNode, subSeq_4862: Int, property_4862: Any)
-    extends flatgraph.Edge(src_4762, dst_4762, 15.toShort, subSeq_4862, property_4862) {}
+    extends flatgraph.Edge(src_4762, dst_4762, 22, subSeq_4862, property_4862) {}
 
 object IsCallForImport {
   val Label = "IS_CALL_FOR_IMPORT"
@@ -134,7 +190,15 @@ object IsCallForImport {
 }
 
 class IsCallForImport(src_4762: flatgraph.GNode, dst_4762: flatgraph.GNode, subSeq_4862: Int, property_4862: Any)
-    extends flatgraph.Edge(src_4762, dst_4762, 16.toShort, subSeq_4862, property_4862) {}
+    extends flatgraph.Edge(src_4762, dst_4762, 23, subSeq_4862, property_4862) {}
+
+object JumpArgument {
+  val Label = "JUMP_ARGUMENT"
+
+}
+
+class JumpArgument(src_4762: flatgraph.GNode, dst_4762: flatgraph.GNode, subSeq_4862: Int, property_4862: Any)
+    extends flatgraph.Edge(src_4762, dst_4762, 24, subSeq_4862, property_4862) {}
 
 object ParameterLink {
   val Label = "PARAMETER_LINK"
@@ -142,7 +206,7 @@ object ParameterLink {
 }
 
 class ParameterLink(src_4762: flatgraph.GNode, dst_4762: flatgraph.GNode, subSeq_4862: Int, property_4862: Any)
-    extends flatgraph.Edge(src_4762, dst_4762, 17.toShort, subSeq_4862, property_4862) {}
+    extends flatgraph.Edge(src_4762, dst_4762, 25, subSeq_4862, property_4862) {}
 
 object PostDominate {
   val Label = "POST_DOMINATE"
@@ -150,7 +214,7 @@ object PostDominate {
 }
 
 class PostDominate(src_4762: flatgraph.GNode, dst_4762: flatgraph.GNode, subSeq_4862: Int, property_4862: Any)
-    extends flatgraph.Edge(src_4762, dst_4762, 18.toShort, subSeq_4862, property_4862) {}
+    extends flatgraph.Edge(src_4762, dst_4762, 26, subSeq_4862, property_4862) {}
 
 object ReachingDef {
   val Label                        = "REACHING_DEF"
@@ -158,7 +222,7 @@ object ReachingDef {
 }
 
 class ReachingDef(src_4762: flatgraph.GNode, dst_4762: flatgraph.GNode, subSeq_4862: Int, property_4862: Any)
-    extends flatgraph.Edge(src_4762, dst_4762, 19.toShort, subSeq_4862, property_4862) {
+    extends flatgraph.Edge(src_4762, dst_4762, 27, subSeq_4862, property_4862) {
   override def propertyName: Option[String] = ReachingDef.propertyName
 }
 
@@ -168,7 +232,7 @@ object Receiver {
 }
 
 class Receiver(src_4762: flatgraph.GNode, dst_4762: flatgraph.GNode, subSeq_4862: Int, property_4862: Any)
-    extends flatgraph.Edge(src_4762, dst_4762, 20.toShort, subSeq_4862, property_4862) {}
+    extends flatgraph.Edge(src_4762, dst_4762, 28, subSeq_4862, property_4862) {}
 
 object Ref {
   val Label = "REF"
@@ -176,7 +240,7 @@ object Ref {
 }
 
 class Ref(src_4762: flatgraph.GNode, dst_4762: flatgraph.GNode, subSeq_4862: Int, property_4862: Any)
-    extends flatgraph.Edge(src_4762, dst_4762, 21.toShort, subSeq_4862, property_4862) {}
+    extends flatgraph.Edge(src_4762, dst_4762, 29, subSeq_4862, property_4862) {}
 
 object SourceFile {
   val Label = "SOURCE_FILE"
@@ -184,7 +248,7 @@ object SourceFile {
 }
 
 class SourceFile(src_4762: flatgraph.GNode, dst_4762: flatgraph.GNode, subSeq_4862: Int, property_4862: Any)
-    extends flatgraph.Edge(src_4762, dst_4762, 22.toShort, subSeq_4862, property_4862) {}
+    extends flatgraph.Edge(src_4762, dst_4762, 30, subSeq_4862, property_4862) {}
 
 object TaggedBy {
   val Label = "TAGGED_BY"
@@ -192,4 +256,20 @@ object TaggedBy {
 }
 
 class TaggedBy(src_4762: flatgraph.GNode, dst_4762: flatgraph.GNode, subSeq_4862: Int, property_4862: Any)
-    extends flatgraph.Edge(src_4762, dst_4762, 23.toShort, subSeq_4862, property_4862) {}
+    extends flatgraph.Edge(src_4762, dst_4762, 31, subSeq_4862, property_4862) {}
+
+object TrueBody {
+  val Label = "TRUE_BODY"
+
+}
+
+class TrueBody(src_4762: flatgraph.GNode, dst_4762: flatgraph.GNode, subSeq_4862: Int, property_4862: Any)
+    extends flatgraph.Edge(src_4762, dst_4762, 32, subSeq_4862, property_4862) {}
+
+object TryBody {
+  val Label = "TRY_BODY"
+
+}
+
+class TryBody(src_4762: flatgraph.GNode, dst_4762: flatgraph.GNode, subSeq_4862: Int, property_4862: Any)
+    extends flatgraph.Edge(src_4762, dst_4762, 33, subSeq_4862, property_4862) {}
