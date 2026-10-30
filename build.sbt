@@ -1,17 +1,13 @@
 name := "codepropertygraph"
 
 // parsed by project/Versions.scala, updated by updateDependencies.sh
-val flatgraphVersion = "0.1.2"
+val flatgraphVersion = "0.1.36"
 
 inThisBuild(
   List(
-    organization := "io.shiftleft",
-    scalaVersion := "3.5.2",
-    resolvers ++= Seq(
-      "Github Package Registry" at "https://maven.pkg.github.com/Privado-Inc/flatgraph",
-      Resolver.mavenLocal,
-      "Sonatype OSS" at "https://oss.sonatype.org/content/repositories/public"
-    ),
+    organization       := "io.shiftleft",
+    scalaVersion       := "3.9.0",
+    resolvers ++= Seq(Resolver.mavenLocal, "Sonatype OSS" at "https://oss.sonatype.org/content/repositories/public"),
     packageDoc / publishArtifact := true,
     packageSrc / publishArtifact := true,
     scmInfo := Some(
@@ -37,6 +33,7 @@ inThisBuild(
 )
 
 ThisBuild / publishTo             := sonatypePublishToBundle.value
+ThisBuild/sonatypeCredentialHost := "central.sonatype.com"
 ThisBuild / sonatypeTimeoutMillis := 7200000 // double the default close timeout
 ThisBuild / Test / fork           := true
 ThisBuild / Test / javaOptions += s"-Dlog4j2.configurationFile=file:${(ThisBuild / baseDirectory).value}/resources/log4j2-test.xml"
@@ -45,7 +42,7 @@ ThisBuild / Test / javaOptions += s"-Duser.dir=${(ThisBuild / baseDirectory).val
 
 ThisBuild / libraryDependencies ++= Seq(
   "org.apache.logging.log4j" % "log4j-slf4j2-impl" % "2.19.0" % Optional,
-  "org.apache.logging.log4j" % "log4j-core"        % "2.19.0" % Optional
+  "org.apache.logging.log4j" % "log4j-core"        % "2.19.0" % Optional,
   // `Optional` means "not transitive", but still included in "stage/lib"
 )
 
@@ -59,20 +56,21 @@ lazy val codepropertygraph = Projects.codepropertygraph
 lazy val schema2json       = Projects.schema2json
 
 ThisBuild / scalacOptions ++= Seq(
-  "-release",
-  "8",
+  "-release", "17",
   "-deprecation",
   "-feature",
   // "-explain",
   // "-Xfatal-warnings",
   // "-Wconf:cat=deprecation:w,any:e",
-  "-language:implicitConversions"
+  "-Wconf:msg=Implicit parameters should be provided with a `using` clause:s",
+  "-language:implicitConversions",
+  "-no-indent", // Require classical {...} syntax, indentation is not significant.
+  "-old-syntax" // Require `(...)` around conditions.
 )
 
 ThisBuild / javacOptions ++= Seq(
   "-g", // debug symbols
-  "--release",
-  "8"
+  "--release", "17"
 )
 
 Global / onChangedBuildSource := ReloadOnSourceChanges

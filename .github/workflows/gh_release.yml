@@ -22,6 +22,7 @@ jobs:
       with:
         distribution: 'adopt'
         java-version: 19
+    - uses: sbt/setup-sbt@v1
     - name: Check formatting
       run: sbt scalafmtCheck Test/scalafmtCheck
       env:
@@ -55,6 +56,7 @@ jobs:
             with:
               distribution: 'adopt'
               java-version: 19
+          - uses: sbt/setup-sbt@v1
           - name: Release to GH Packages
             run: sbt ciReleaseTagNextVersion publish
             env:

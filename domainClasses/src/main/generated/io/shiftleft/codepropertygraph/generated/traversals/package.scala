@@ -1,5 +1,6 @@
 package io.shiftleft.codepropertygraph.generated
 
+import scala.language.implicitConversions
 import io.shiftleft.codepropertygraph.generated.nodes
 
 package object traversals {
@@ -15,6 +16,11 @@ package object traversals {
     implicit def accessPropertyArgumentIndexTraversal[
       NodeType <: nodes.StoredNode & nodes.StaticType[nodes.HasArgumentIndexEMT]
     ](traversal: IterableOnce[NodeType]): TraversalPropertyArgumentIndex[NodeType] = new TraversalPropertyArgumentIndex(
+      traversal.iterator
+    )
+    implicit def accessPropertyArgumentLabelTraversal[
+      NodeType <: nodes.StoredNode & nodes.StaticType[nodes.HasArgumentLabelEMT]
+    ](traversal: IterableOnce[NodeType]): TraversalPropertyArgumentLabel[NodeType] = new TraversalPropertyArgumentLabel(
       traversal.iterator
     )
     implicit def accessPropertyArgumentNameTraversal[
@@ -36,23 +42,10 @@ package object traversals {
     ](traversal: IterableOnce[NodeType]): TraversalPropertyCanonicalName[NodeType] = new TraversalPropertyCanonicalName(
       traversal.iterator
     )
-    implicit def accessPropertyClassNameTraversal[
-      NodeType <: nodes.StoredNode & nodes.StaticType[nodes.HasClassNameEMT]
-    ](traversal: IterableOnce[NodeType]): TraversalPropertyClassName[NodeType] = new TraversalPropertyClassName(
-      traversal.iterator
-    )
-    implicit def accessPropertyClassShortNameTraversal[
-      NodeType <: nodes.StoredNode & nodes.StaticType[nodes.HasClassShortNameEMT]
-    ](traversal: IterableOnce[NodeType]): TraversalPropertyClassShortName[NodeType] =
-      new TraversalPropertyClassShortName(traversal.iterator)
     implicit def accessPropertyClosureBindingIdTraversal[
       NodeType <: nodes.StoredNode & nodes.StaticType[nodes.HasClosureBindingIdEMT]
     ](traversal: IterableOnce[NodeType]): TraversalPropertyClosureBindingId[NodeType] =
       new TraversalPropertyClosureBindingId(traversal.iterator)
-    implicit def accessPropertyClosureOriginalNameTraversal[
-      NodeType <: nodes.StoredNode & nodes.StaticType[nodes.HasClosureOriginalNameEMT]
-    ](traversal: IterableOnce[NodeType]): TraversalPropertyClosureOriginalName[NodeType] =
-      new TraversalPropertyClosureOriginalName(traversal.iterator)
     implicit def accessPropertyCodeTraversal[NodeType <: nodes.StoredNode & nodes.StaticType[nodes.HasCodeEMT]](
       traversal: IterableOnce[NodeType]
     ): TraversalPropertyCode[NodeType] = new TraversalPropertyCode(traversal.iterator)
@@ -94,6 +87,10 @@ package object traversals {
       NodeType <: nodes.StoredNode & nodes.StaticType[nodes.HasEvaluationStrategyEMT]
     ](traversal: IterableOnce[NodeType]): TraversalPropertyEvaluationStrategy[NodeType] =
       new TraversalPropertyEvaluationStrategy(traversal.iterator)
+    implicit def accessPropertyEvidenceDescriptionTraversal[
+      NodeType <: nodes.StoredNode & nodes.StaticType[nodes.HasEvidenceDescriptionEMT]
+    ](traversal: IterableOnce[NodeType]): TraversalPropertyEvidenceDescription[NodeType] =
+      new TraversalPropertyEvidenceDescription(traversal.iterator)
     implicit def accessPropertyExplicitAsTraversal[
       NodeType <: nodes.StoredNode & nodes.StaticType[nodes.HasExplicitAsEMT]
     ](traversal: IterableOnce[NodeType]): TraversalPropertyExplicitAs[NodeType] = new TraversalPropertyExplicitAs(
@@ -105,6 +102,10 @@ package object traversals {
     implicit def accessPropertyFullNameTraversal[NodeType <: nodes.StoredNode & nodes.StaticType[nodes.HasFullNameEMT]](
       traversal: IterableOnce[NodeType]
     ): TraversalPropertyFullName[NodeType] = new TraversalPropertyFullName(traversal.iterator)
+    implicit def accessPropertyGenericSignatureTraversal[
+      NodeType <: nodes.StoredNode & nodes.StaticType[nodes.HasGenericSignatureEMT]
+    ](traversal: IterableOnce[NodeType]): TraversalPropertyGenericSignature[NodeType] =
+      new TraversalPropertyGenericSignature(traversal.iterator)
     implicit def accessPropertyHashTraversal[NodeType <: nodes.StoredNode & nodes.StaticType[nodes.HasHashEMT]](
       traversal: IterableOnce[NodeType]
     ): TraversalPropertyHash[NodeType] = new TraversalPropertyHash(traversal.iterator)
@@ -134,6 +135,10 @@ package object traversals {
     ](traversal: IterableOnce[NodeType]): TraversalPropertyIsExternal[NodeType] = new TraversalPropertyIsExternal(
       traversal.iterator
     )
+    implicit def accessPropertyIsModuleImportTraversal[
+      NodeType <: nodes.StoredNode & nodes.StaticType[nodes.HasIsModuleImportEMT]
+    ](traversal: IterableOnce[NodeType]): TraversalPropertyIsModuleImport[NodeType] =
+      new TraversalPropertyIsModuleImport(traversal.iterator)
     implicit def accessPropertyIsVariadicTraversal[
       NodeType <: nodes.StoredNode & nodes.StaticType[nodes.HasIsVariadicEMT]
     ](traversal: IterableOnce[NodeType]): TraversalPropertyIsVariadic[NodeType] = new TraversalPropertyIsVariadic(
@@ -164,10 +169,6 @@ package object traversals {
       NodeType <: nodes.StoredNode & nodes.StaticType[nodes.HasMethodFullNameEMT]
     ](traversal: IterableOnce[NodeType]): TraversalPropertyMethodFullName[NodeType] =
       new TraversalPropertyMethodFullName(traversal.iterator)
-    implicit def accessPropertyMethodShortNameTraversal[
-      NodeType <: nodes.StoredNode & nodes.StaticType[nodes.HasMethodShortNameEMT]
-    ](traversal: IterableOnce[NodeType]): TraversalPropertyMethodShortName[NodeType] =
-      new TraversalPropertyMethodShortName(traversal.iterator)
     implicit def accessPropertyModifierTypeTraversal[
       NodeType <: nodes.StoredNode & nodes.StaticType[nodes.HasModifierTypeEMT]
     ](traversal: IterableOnce[NodeType]): TraversalPropertyModifierType[NodeType] = new TraversalPropertyModifierType(
@@ -176,11 +177,6 @@ package object traversals {
     implicit def accessPropertyNameTraversal[NodeType <: nodes.StoredNode & nodes.StaticType[nodes.HasNameEMT]](
       traversal: IterableOnce[NodeType]
     ): TraversalPropertyName[NodeType] = new TraversalPropertyName(traversal.iterator)
-    implicit def accessPropertyNodeLabelTraversal[
-      NodeType <: nodes.StoredNode & nodes.StaticType[nodes.HasNodeLabelEMT]
-    ](traversal: IterableOnce[NodeType]): TraversalPropertyNodeLabel[NodeType] = new TraversalPropertyNodeLabel(
-      traversal.iterator
-    )
     implicit def accessPropertyOffsetTraversal[NodeType <: nodes.StoredNode & nodes.StaticType[nodes.HasOffsetEMT]](
       traversal: IterableOnce[NodeType]
     ): TraversalPropertyOffset[NodeType] = new TraversalPropertyOffset(traversal.iterator)
@@ -195,11 +191,6 @@ package object traversals {
     implicit def accessPropertyOverlaysTraversal[NodeType <: nodes.StoredNode & nodes.StaticType[nodes.HasOverlaysEMT]](
       traversal: IterableOnce[NodeType]
     ): TraversalPropertyOverlays[NodeType] = new TraversalPropertyOverlays(traversal.iterator)
-    implicit def accessPropertyPackageNameTraversal[
-      NodeType <: nodes.StoredNode & nodes.StaticType[nodes.HasPackageNameEMT]
-    ](traversal: IterableOnce[NodeType]): TraversalPropertyPackageName[NodeType] = new TraversalPropertyPackageName(
-      traversal.iterator
-    )
     implicit def accessPropertyParserTypeNameTraversal[
       NodeType <: nodes.StoredNode & nodes.StaticType[nodes.HasParserTypeNameEMT]
     ](traversal: IterableOnce[NodeType]): TraversalPropertyParserTypeName[NodeType] =
@@ -217,9 +208,10 @@ package object traversals {
     ](traversal: IterableOnce[NodeType]): TraversalPropertySignature[NodeType] = new TraversalPropertySignature(
       traversal.iterator
     )
-    implicit def accessPropertySymbolTraversal[NodeType <: nodes.StoredNode & nodes.StaticType[nodes.HasSymbolEMT]](
-      traversal: IterableOnce[NodeType]
-    ): TraversalPropertySymbol[NodeType] = new TraversalPropertySymbol(traversal.iterator)
+    implicit def accessPropertyStaticReceiverTraversal[
+      NodeType <: nodes.StoredNode & nodes.StaticType[nodes.HasStaticReceiverEMT]
+    ](traversal: IterableOnce[NodeType]): TraversalPropertyStaticReceiver[NodeType] =
+      new TraversalPropertyStaticReceiver(traversal.iterator)
     implicit def accessPropertyTypeDeclFullNameTraversal[
       NodeType <: nodes.StoredNode & nodes.StaticType[nodes.HasTypeDeclFullNameEMT]
     ](traversal: IterableOnce[NodeType]): TraversalPropertyTypeDeclFullName[NodeType] =
@@ -307,9 +299,6 @@ package object traversals {
     implicit def traversalLocalBase[NodeType <: nodes.LocalBase](
       traversal: IterableOnce[NodeType]
     ): TraversalLocalBase[NodeType] = new TraversalLocalBase(traversal.iterator)
-    implicit def traversalLocationBase[NodeType <: nodes.LocationBase](
-      traversal: IterableOnce[NodeType]
-    ): TraversalLocationBase[NodeType] = new TraversalLocationBase(traversal.iterator)
     implicit def traversalMemberBase[NodeType <: nodes.MemberBase](
       traversal: IterableOnce[NodeType]
     ): TraversalMemberBase[NodeType] = new TraversalMemberBase(traversal.iterator)

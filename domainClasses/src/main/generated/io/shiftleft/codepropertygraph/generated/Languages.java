@@ -18,6 +18,9 @@ public static final String GOLANG = "GOLANG";
 public static final String CSHARP = "CSHARP";
 
 
+public static final String ABAP = "ABAP";
+
+
 public static final String C = "C";
 
 
@@ -59,11 +62,15 @@ public static final String SWIFTSRC = "SWIFTSRC";
 /** Source-based frontend for C# and .NET */
 public static final String CSHARPSRC = "CSHARPSRC";
 
+
+public static final String RUST = "RUST";
+
 public static Set<String> ALL = new HashSet<String>() {{
 add(JAVA);
 add(JAVASCRIPT);
 add(GOLANG);
 add(CSHARP);
+add(ABAP);
 add(C);
 add(PYTHON);
 add(LLVM);
@@ -78,6 +85,7 @@ add(JSSRC);
 add(RUBYSRC);
 add(SWIFTSRC);
 add(CSHARPSRC);
+add(RUST);
 }};
 
 }

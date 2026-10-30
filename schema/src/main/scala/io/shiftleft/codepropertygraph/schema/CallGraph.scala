@@ -37,7 +37,7 @@ object CallGraph extends SchemaBase {
                     |""".stripMargin
       )
       .mandatory(-1)
-      .protoId(40)
+      .protoId(ProtoIds.ArgumentIndex)
 
     val argumentName = builder
       .addProperty(
@@ -47,9 +47,27 @@ object CallGraph extends SchemaBase {
             |For calls involving named parameters, the `ARGUMENT_NAME` field holds the
             |name of the parameter initialized by the expression. For all other calls,
             |this field is unset.
+            |Note that the `ARGUMENT_NAME` should be an exact match of the NAME of a
+            |METHOD_PARAMETER_{IN,OUT}. It overrides ARGUMENT_INDEX for dataflow purposes.
             |""".stripMargin
       )
-      .protoId(130)
+      .protoId(ProtoIds.ArgumentName)
+
+    val argumentLabel = builder
+      .addProperty(
+        name = "ARGUMENT_LABEL",
+        valueType = ValueType.String,
+        comment = """
+            |This field is used to keep track of the argument label for languages that support them, such as Swift.
+            |It is used in addition to `ARGUMENT_INDEX` and can be used to reconstruct the original call syntax more faithfully.
+            |For example, in Swift, a method call may look like `foo(arg1: 42, arg2: "hello")` where `arg1` and `arg2`
+            |are argument labels. In this case, the `ARGUMENT_LABEL` field for the first argument would be set to `arg1`
+            |and for the second argument it would be set to `arg2`.
+            |Contrary to the `ARGUMENT_NAME` the label should not be expected to match the name of any parameter,
+            |and is not needed for dataflow purposes at all.
+            |""".stripMargin
+      )
+      .protoId(ProtoIds.ArgumentLabel)
 
     val methodFullName = builder
       .addProperty(
@@ -59,9 +77,9 @@ object CallGraph extends SchemaBase {
                     |to have exactly one METHOD node for each METHOD_FULL_NAME""".stripMargin
       )
       .mandatory(PropertyDefaults.String)
-      .protoId(54)
+      .protoId(ProtoIds.MethodFullName)
 
-    expression.addProperties(argumentIndex, argumentName)
+    expression.addProperties(argumentIndex, argumentName, argumentLabel)
 
     val evaluationStrategy = builder
       .addProperty(
@@ -77,7 +95,7 @@ object CallGraph extends SchemaBase {
             |""".stripMargin
       )
       .mandatory(PropertyDefaults.String)
-      .protoId(15)
+      .protoId(ProtoIds.EvaluationStrategy)
 
     val evaluationStrategies = builder.addConstants(
       category = "EvaluationStrategies",
@@ -87,20 +105,20 @@ object CallGraph extends SchemaBase {
         valueType = ValueType.String,
         comment =
           "A parameter or return of a function is passed by reference which means an address is used behind the scenes"
-      ).protoId(1),
+      ).protoId(ProtoIds.ByReference),
       Constant(
         name = "BY_SHARING",
         value = "BY_SHARING",
         valueType = ValueType.String,
         comment =
           "Only applicable to object parameter or return values. The pointer to the object is passed by value but the object itself is not copied and changes to it are thus propagated out of the method context"
-      ).protoId(2),
+      ).protoId(ProtoIds.BySharing),
       Constant(
         name = "BY_VALUE",
         value = "BY_VALUE",
         valueType = ValueType.String,
         comment = "A parameter or return of a function passed by value which means a flat copy is used"
-      ).protoId(3)
+      ).protoId(ProtoIds.ByValue)
     )
 
     methodParameterIn.addProperties(evaluationStrategy)
@@ -119,7 +137,7 @@ object CallGraph extends SchemaBase {
             |""".stripMargin
       )
       .mandatory(PropertyDefaults.String)
-      .protoId(25)
+      .protoId(ProtoIds.DispatchType)
 
     val call = builder
       .addEdgeType(
@@ -131,7 +149,8 @@ object CallGraph extends SchemaBase {
             |automatically as the CPG is first loaded.
             |""".stripMargin
       )
-      .protoId(6)
+      .withDefaultAccessorName("STATIC_CALL")
+      .protoId(ProtoIds.CallEdge)
 
     val argument = builder
       .addEdgeType(
@@ -141,7 +160,7 @@ object CallGraph extends SchemaBase {
             |that return.
             |""".stripMargin
       )
-      .protoId(156)
+      .protoId(ProtoIds.Argument)
 
     val receiver = builder
       .addEdgeType(
@@ -152,7 +171,7 @@ object CallGraph extends SchemaBase {
             |assigned to the `this` pointer as control is transferred to the method.
             |""".stripMargin
       )
-      .protoId(55)
+      .protoId(ProtoIds.Receiver)
 
     val dispatchTypes = builder.addConstants(
       category = "DispatchTypes",
@@ -161,23 +180,37 @@ object CallGraph extends SchemaBase {
         value = "STATIC_DISPATCH",
         valueType = ValueType.String,
         comment = "For statically dispatched calls the call target is known before program execution"
-      ).protoId(1),
+      ).protoId(ProtoIds.StaticDispatch),
       Constant(
         name = "DYNAMIC_DISPATCH",
         value = "DYNAMIC_DISPATCH",
         valueType = ValueType.String,
         comment = "For dynamically dispatched calls the target is determined during runtime"
-      ).protoId(2),
+      ).protoId(ProtoIds.DynamicDispatch),
       Constant(
         name = "INLINED",
         value = "INLINED",
         valueType = ValueType.String,
         comment = "For macro expansions, code is inlined."
-      ).protoId(3)
+      ).protoId(ProtoIds.Inlined)
     )
 
+    val staticReceiver = builder
+      .addProperty(
+        name = "STATIC_RECEIVER",
+        valueType = ValueType.String,
+        comment = """The `STATIC_RECEIVER` field is used to keep track of the type on which a static method
+            |is called for static methods which may be inherited. This information can then be used to find
+            |the true `METHOD_FULL_NAME` of the method being called during call linking. For example, if a
+            |class `Foo` defines a static method `foo` and a class `Bar extends Foo`, then the `STATIC_RECEIVER`
+            |of a`Bar.foo()` call is `Bar` and the `METHOD_FULL_NAME` of the `foo` call is rewritten to
+            |`Foo.foo:<signature>`.
+            |""".stripMargin
+      )
+      .protoId(ProtoIds.StaticReceiver)
+
     callNode
-      .addProperties(dispatchType)
+      .addProperties(dispatchType, staticReceiver)
 
     callNode
       .addOutEdge(edge = call, inNode = method)

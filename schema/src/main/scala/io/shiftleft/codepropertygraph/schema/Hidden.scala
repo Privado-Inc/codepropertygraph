@@ -2,6 +2,7 @@ package io.shiftleft.codepropertygraph.schema
 
 import flatgraph.schema.Property.ValueType
 import flatgraph.schema.{EdgeType, NodeType, SchemaBuilder, SchemaInfo}
+import io.shiftleft.codepropertygraph.schema.CpgSchema.PropertyDefaults
 
 object Hidden extends SchemaBase {
   override def docIndex: Int = -1
@@ -23,7 +24,7 @@ object Hidden extends SchemaBase {
     fs: FileSystem.Schema,
     callGraph: CallGraph.Schema,
     pdg: Pdg.Schema,
-    tags: TagsAndLocation.Schema,
+    tags: Tags.Schema,
     shortcuts: Shortcuts.Schema
   ) = new Schema(builder, base, methodSchema, typeDecl, ast, cfg, fs, callGraph, pdg, tags, shortcuts)
 
@@ -37,7 +38,7 @@ object Hidden extends SchemaBase {
     fsSchema: FileSystem.Schema,
     callGraph: CallGraph.Schema,
     pdg: Pdg.Schema,
-    tags: TagsAndLocation.Schema,
+    tags: Tags.Schema,
     shortcuts: Shortcuts.Schema
   ) {
 
@@ -64,20 +65,12 @@ object Hidden extends SchemaBase {
         comment =
           "Identifier which uniquely describes a CLOSURE_BINDING. This property is used to match captured LOCAL nodes with the corresponding CLOSURE_BINDING nodes"
       )
-      .protoId(50)
-
-    val closureOriginalName = builder
-      .addProperty(
-        name = "CLOSURE_ORIGINAL_NAME",
-        valueType = ValueType.String,
-        comment = "The original name of the (potentially mangled) captured variable"
-      )
-      .protoId(159)
+      .protoId(ProtoIds.ClosureBindingId)
 
     // edge types
     val capture = builder
       .addEdgeType(name = "CAPTURE", comment = "Represents the capturing of a variable into a closure")
-      .protoId(40)
+      .protoId(ProtoIds.Capture)
 
     // node types
     local.addProperties(closureBindingId)
@@ -88,15 +81,15 @@ object Hidden extends SchemaBase {
         name = "CLOSURE_BINDING",
         comment = "Represents the binding of a LOCAL or METHOD_PARAMETER_IN into the closure of a method"
       )
-      .protoId(334)
-      .addProperties(closureBindingId, evaluationStrategy, closureOriginalName)
+      .protoId(ProtoIds.ClosureBinding)
+      .addProperties(closureBindingId, evaluationStrategy)
 
     val capturedBy = builder
       .addEdgeType(
         name = "CAPTURED_BY",
         comment = "Connection between a captured LOCAL and the corresponding CLOSURE_BINDING"
       )
-      .protoId(41)
+      .protoId(ProtoIds.CapturedBy)
 
     // node relations
     local.addOutEdge(edge = capturedBy, inNode = closureBinding)
@@ -119,7 +112,7 @@ object Hidden extends SchemaBase {
         name = "TEMPLATE_DOM",
         comment = "This node represents a DOM node used in template languages, e.g., JSX/TSX"
       )
-      .protoId(417)
+      .protoId(ProtoIds.TemplateDom)
       .addProperties(name)
       .extendz(expression)
 
@@ -141,12 +134,12 @@ object Hidden extends SchemaBase {
         valueType = ValueType.String,
         comment = "The group ID for a dependency"
       )
-      .protoId(58)
+      .protoId(ProtoIds.DependencyGroupId)
 
     // node types
     val dependency: NodeType = builder
       .addNodeType(name = "DEPENDENCY", comment = "This node represents a dependency")
-      .protoId(35)
+      .protoId(ProtoIds.Dependency)
       .addProperties(version, name, dependencyGroupId)
       .primaryKey(name)
 
@@ -161,7 +154,7 @@ object Hidden extends SchemaBase {
         comment = "Type hint for the dynamic type. These are observed to be verifiable at runtime."
       )
       .asList()
-      .protoId(1591)
+      .protoId(ProtoIds.DynamicTypeHintFullName)
 
     val possibleTypes = builder
       .addProperty(
@@ -171,7 +164,7 @@ object Hidden extends SchemaBase {
           "Similar to `DYNAMIC_TYPE_HINT_FULL_NAME`, but that this makes no guarantee that types within this property are correct. This property is used to capture observations between node interactions during a 'may-analysis'."
       )
       .asList()
-      .protoId(1592)
+      .protoId(ProtoIds.PossibleTypes)
 
     callNode.addProperties(dynamicTypeHintFullName, possibleTypes)
     methodParameterIn.addProperties(dynamicTypeHintFullName, possibleTypes)
@@ -252,15 +245,26 @@ object Hidden extends SchemaBase {
             |""".stripMargin
       )
 
+    val isModuleImport = builder
+      .addProperty(
+        name = "IS_MODULE_IMPORT",
+        valueType = ValueType.Boolean,
+        comment = """Specifies whether this is a module import.
+            |This is used for languages like Java >= 25 where packages exported by a module
+            |can be imported via the module name (which does not need to match the package names in
+            |any way).""".stripMargin
+      )
+
     importNode.addProperty(importedEntity)
     importNode.addProperty(importedAs)
     importNode.addProperty(explicitAs)
     importNode.addProperty(isWildcard)
     importNode.addProperty(isExplicit)
+    importNode.addProperty(isModuleImport)
 
     val imports = builder
       .addEdgeType(name = "IMPORTS", comment = "Edge from imports to dependencies")
-      .protoId(23663)
+      .protoId(ProtoIds.Imports)
 
     val isCallForImport = builder
       .addEdgeType(
@@ -270,7 +274,7 @@ object Hidden extends SchemaBase {
 ￼        |to the corresponding import statement in the AST.
 ￼        |""".stripMargin
       )
-      .protoId(23664)
+      .protoId(ProtoIds.IsCallForImport)
 
     importNode.addOutEdge(edge = imports, inNode = dependency)
     importNode.addOutEdge(edge = taggedBy, inNode = tag)
@@ -287,6 +291,23 @@ object Hidden extends SchemaBase {
         |we can use this to preserve the link to the original""".stripMargin
     )
 
+    val genericSignature = builder
+      .addProperty(
+        name = "GENERIC_SIGNATURE",
+        valueType = ValueType.String,
+        comment = """This field is experimental. It will likely be removed in the future without any notice.
+                    |It stores type information for generic types and methods as well as type information
+                    |for members and locals where the type either contains a type parameter reference or
+                    |an instantiated type reference.
+                    |""".stripMargin
+      )
+      .mandatory(PropertyDefaults.String)
+      .protoId(ProtoIds.GenericSignature)
+
+    method.addProperty(genericSignature)
+    typeDecl.addProperty(genericSignature)
+    member.addProperty(genericSignature)
+    local.addProperty(genericSignature)
   }
 
 }

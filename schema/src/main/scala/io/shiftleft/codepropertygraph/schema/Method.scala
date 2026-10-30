@@ -38,7 +38,7 @@ object Method extends SchemaBase {
                     |""".stripMargin
       )
       .mandatory("")
-      .protoId(22)
+      .protoId(ProtoIds.Signature)
 
     val method: NodeType = builder
       .addNodeType(
@@ -61,20 +61,15 @@ object Method extends SchemaBase {
             |the name of the source file is specified in `FILENAME`. An optional hash value
             |MAY be calculated over the function contents and included in the `HASH` field.
             |
-            |The optional `OFFSET` and `OFFSET_END` specify the start
-            |and exclusive end position of the code belonging to a method within the corresponding
-            |`FILE` nodes `CONTENT` property.
-            |
             |Finally, the fully qualified name of the program constructs that the method
             |is immediately contained in is stored in the `AST_PARENT_FULL_NAME` field
             |and its type is indicated in the `AST_PARENT_TYPE` field to be one of
             |`METHOD`, `TYPE_DECL` or `NAMESPACE_BLOCK`.
             |""".stripMargin
       )
-      .protoId(1)
+      .protoId(ProtoIds.Method)
       .addProperties(fullName, isExternal, signature, lineNumberEnd, columnNumberEnd, filename, hash)
       .addProperties(astParentType, astParentFullName)
-      .addProperties(offset, offsetEnd)
       .extendz(declaration)
       .primaryKey(name)
 
@@ -89,7 +84,7 @@ object Method extends SchemaBase {
                     |""".stripMargin
       )
       .mandatory(false)
-      .protoId(221)
+      .protoId(ProtoIds.IsVariadic)
 
     val methodParameterIn: NodeType = builder
       .addNodeType(
@@ -99,7 +94,7 @@ object Method extends SchemaBase {
             |name, while the field `TYPE_FULL_NAME` contains the fully qualified type name.
             |""".stripMargin
       )
-      .protoId(34)
+      .protoId(ProtoIds.MethodParameterIn)
       .addProperties(typeFullName, isVariadic, index)
       .extendz(declaration)
       .primaryKey(name)
@@ -112,7 +107,7 @@ object Method extends SchemaBase {
             |created upon first loading the CPG.
             |""".stripMargin
       )
-      .protoId(33)
+      .protoId(ProtoIds.MethodParameterOut)
       .addProperties(typeFullName, isVariadic, index)
       .extendz(declaration)
 
@@ -125,7 +120,7 @@ object Method extends SchemaBase {
             |on this value.
             |""".stripMargin
       )
-      .protoId(3)
+      .protoId(ProtoIds.MethodReturn)
       .addProperties(typeFullName)
 
     method.addOutEdge(edge = sourceFile, inNode = file, stepNameIn = "method")
